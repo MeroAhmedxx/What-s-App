@@ -1,0 +1,250 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Language {
+  AR
+  EN
+}
+
+enum ConversationStatus {
+  ACTIVE
+  CLOSED
+}
+
+enum HandoffStatus {
+  NONE
+  REQUESTED
+  ASSIGNED
+  CLOSED
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageType {
+  TEXT
+  INTERACTIVE
+  TEMPLATE
+  IMAGE
+  DOCUMENT
+}
+
+enum StockStatus {
+  IN_STOCK
+  OUT_OF_STOCK
+  ON_BACKORDER
+}
+
+enum CartStatus {
+  ACTIVE
+  CHECKED_OUT
+  ABANDONED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  COD
+  CARD
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  ASSIGNED
+  RESOLVED
+  CLOSED
+}
+
+model Customer {
+  id                String         @id @default(cuid())
+  phoneE164         String         @unique
+  name              String?
+  preferredLanguage Language?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  conversations     Conversation[]
+  carts             Cart[]
+  orders            Order[]
+  tickets           SupportTicket[]
+}
+
+model Conversation {
+  id                 String              @id @default(cuid())
+  customerId         String
+  channel            String              @default("whatsapp")
+  status             ConversationStatus  @default(ACTIVE)
+  currentIntent      String?
+  activeFlow         String?
+  handoffStatus      HandoffStatus       @default(NONE)
+  startedAt          DateTime            @default(now())
+  lastUserMessageAt  DateTime?
+  lastBotMessageAt   DateTime?
+
+  customer           Customer            @relation(fields: [customerId], references: [id])
+  messages           Message[]
+  tickets            SupportTicket[]
+}
+
+model Message {
+  id              String           @id @default(cuid())
+  conversationId  String
+  direction       MessageDirection
+  type            MessageType
+  externalId      String?
+  text            String?
+  payloadJson     Json?
+  createdAt       DateTime         @default(now())
+
+  conversation    Conversation     @relation(fields: [conversationId], references: [id])
+}
+
+model Product {
+  id              String            @id @default(cuid())
+  wooId           Int               @unique
+  sku             String?
+  slug            String?
+  nameAr          String
+  nameEn          String?
+  descriptionAr   String?
+  descriptionEn   String?
+  imageUrl        String?
+  stockStatus     StockStatus       @default(OUT_OF_STOCK)
+  regularPrice    Decimal?          @db.Decimal(10, 2)
+  salePrice       Decimal?          @db.Decimal(10, 2)
+  currency        String            @default("EGP")
+  isActive        Boolean           @default(true)
+  lastSyncedAt    DateTime?
+
+  categories      ProductCategory[]
+  cartItems       CartItem[]
+  orderItems      OrderItem[]
+}
+
+model Category {
+  id              String            @id @default(cuid())
+  wooId           Int               @unique
+  nameAr          String
+  nameEn          String?
+  slug            String?
+  isActive        Boolean           @default(true)
+
+  products        ProductCategory[]
+}
+
+model ProductCategory {
+  productId       String
+  categoryId      String
+
+  product         Product           @relation(fields: [productId], references: [id])
+  category        Category          @relation(fields: [categoryId], references: [id])
+
+  @@id([productId, categoryId])
+}
+
+model Cart {
+  id              String            @id @default(cuid())
+  customerId      String
+  status          CartStatus        @default(ACTIVE)
+  subtotal        Decimal           @default(0) @db.Decimal(10, 2)
+  shippingFee     Decimal           @default(0) @db.Decimal(10, 2)
+  total           Decimal           @default(0) @db.Decimal(10, 2)
+  currency        String            @default("EGP")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  customer        Customer          @relation(fields: [customerId], references: [id])
+  items           CartItem[]
+}
+
+model CartItem {
+  id              String            @id @default(cuid())
+  cartId          String
+  productId       String
+  quantity        Int
+  unitPrice       Decimal           @db.Decimal(10, 2)
+
+  cart            Cart              @relation(fields: [cartId], references: [id])
+  product         Product           @relation(fields: [productId], references: [id])
+}
+
+model Order {
+  id                String          @id @default(cuid())
+  customerId        String
+  wooOrderId        Int?            @unique
+  cartId            String?
+  status            OrderStatus     @default(PENDING)
+  paymentMethod     PaymentMethod
+  governorate       String?
+  city              String?
+  addressLine       String?
+  notes             String?
+  subtotal          Decimal         @default(0) @db.Decimal(10, 2)
+  shippingFee       Decimal         @default(0) @db.Decimal(10, 2)
+  total             Decimal         @default(0) @db.Decimal(10, 2)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  customer          Customer        @relation(fields: [customerId], references: [id])
+  items             OrderItem[]
+}
+
+model OrderItem {
+  id                String          @id @default(cuid())
+  orderId           String
+  productId         String
+  quantity          Int
+  unitPrice         Decimal         @db.Decimal(10, 2)
+
+  order             Order           @relation(fields: [orderId], references: [id])
+  product           Product         @relation(fields: [productId], references: [id])
+}
+
+model Branch {
+  id                String          @id @default(cuid())
+  name              String
+  governorate       String?
+  city              String?
+  address           String
+  mapUrl            String?
+  phone             String?
+  openingHours      String?
+  isActive          Boolean         @default(true)
+}
+
+model SupportTicket {
+  id                String          @id @default(cuid())
+  customerId        String
+  conversationId    String?
+  topic             String
+  priority          TicketPriority  @default(MEDIUM)
+  status            TicketStatus    @default(OPEN)
+  transcriptJson    Json?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  customer          Customer        @relation(fields: [customerId], references: [id])
+  conversation      Conversation?   @relation(fields: [conversationId], references: [id])
+}
