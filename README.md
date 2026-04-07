@@ -1,6 +1,6 @@
 # Altahhan WhatsApp Bot
 
-Production-oriented NestJS starter backend for a bilingual WhatsApp commerce and support bot for **Al Tahhan Dates**.
+Production-oriented NestJS backend for a bilingual WhatsApp commerce and support bot for **Al Tahhan Dates**.
 
 ## What is included
 - WhatsApp Cloud API webhook verification and inbound handling
@@ -12,30 +12,45 @@ Production-oriented NestJS starter backend for a bilingual WhatsApp commerce and
 - Cart and COD order flows
 - Order lookup endpoint
 - Health endpoint
-- Prisma schema for customers, conversations, messages, products, carts, orders, tickets
+- Prisma schema **and initial migration** for customers, conversations, messages, products, carts, orders, tickets
 - Redis-ready session/cache layer
+- Railway-ready startup script that waits for Postgres, runs migrations, then starts the app
 
-## Main flows
-- Language selection
-- Main menu
-- Product search
-- Shipping FAQ
-- Payment FAQ
-- Branch lookup
-- Talk to an agent
-- Complaint escalation
-- COD order creation
-- Order lookup by phone or Woo order id
-
-## Quick start
+## Quick start (local)
 1. Copy `.env.example` to `.env`
 2. Fill in Meta WhatsApp credentials
 3. Fill in WooCommerce API credentials
 4. Start infrastructure: `docker compose up -d`
 5. Install dependencies: `npm install`
 6. Generate Prisma client: `npx prisma generate`
-7. Run migrations: `npx prisma migrate dev --name init`
+7. Run migrations: `npx prisma migrate deploy`
 8. Start the app: `npm run start:dev`
+
+## Railway deployment
+This repository is prepared for Railway using `nixpacks.toml`.
+
+### Build phase
+Railway should only build the app:
+- `npm install`
+- `npx prisma generate`
+- `npm run build`
+
+### Runtime start
+Railway should start the app with:
+
+```bash
+bash ./scripts/start-production.sh
+```
+
+The startup script will:
+1. generate the Prisma client
+2. wait until the database is reachable
+3. run `prisma migrate deploy`
+4. start the Nest app
+
+### Important Railway note
+Do **not** run Prisma migrations in a Docker build step or custom build command.
+`postgres.railway.internal` is intended for Railway runtime networking, not image build-time.
 
 ## Important endpoints
 - `GET /api/healthz`
