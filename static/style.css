@@ -112,3 +112,36 @@ input,select,textarea,button{font-family:inherit;font-size:14px;border-radius:12
 
 
 .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);font-size:12px;font-weight:800;color:#fff1d6}
+
+/* Final hard contrast overrides for dark theme pages */
+.card, .kpi, .hero-box, .stat-card, .deal-card, .mini-kpi, .pre-card, .wizard-note, .mini-card, .column, .lead-card, .shipment-row-card {
+  background: linear-gradient(180deg,var(--panel),var(--panel-2)) !important;
+  border-color: rgba(202,160,61,.14) !important;
+  color: var(--text) !important;
+}
+.table th, .mini-table th {
+  color: #ffe6b3 !important;
+  background: rgba(255,255,255,.03) !important;
+}
+.table td, .mini-table td, .file-row, .detail-row {
+  border-bottom: 1px solid rgba(255,255,255,.07) !important;
+  color: var(--text) !important;
+}
+.muted, .small.muted, .shipment-table .meta, .file-row .small, .detail-row span {
+  color: var(--muted) !important;
+}
+.doc-pill, .badge {
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  color: var(--text) !important;
+}
+.alert {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  color: var(--muted);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+select, input, textarea {
+  color-scheme: dark;
+}
