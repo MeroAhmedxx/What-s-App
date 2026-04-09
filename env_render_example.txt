@@ -1,0 +1,7 @@
+CRM_DB_URL=postgresql+psycopg://USER:PASSWORD@HOST/DBNAME?sslmode=require
+SECRET_KEY=replace-with-a-long-random-secret
+TRACKING_BASE_URL=https://altahhancrm.onrender.com
+COOKIE_SECURE=true
+RENDER=true
+INITIAL_ADMIN_USERNAME=admin
+INITIAL_ADMIN_PASSWORD=change-this-now

@@ -1,0 +1,9 @@
+{
+  "db_driver": "mysql",
+  "db_server": "MYSQL_SERVER_FROM_SMARTERASP:3306",
+  "db_name": "YOUR_DATABASE_NAME",
+  "db_user": "YOUR_DATABASE_USER",
+  "db_password": "YOUR_DATABASE_PASSWORD",
+  "domain": "http://your-temporary-or-real-domain",
+  "image_prefix": "/uploads"
+}
