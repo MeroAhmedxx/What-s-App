@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>{{ feature_name or 'Desktop only' }}</h1></div>
+<div class="card">
+  <h3>This feature is available from desktop only</h3>
+  <p class="muted small">Use a Windows desktop browser to access Outlook Bridge, email sending, and device setup. Mobile users can still use chat, profile, tasks, leads, and dashboard.</p>
+  <div class="row"><a class="header-link" href="/chat">Open Chat</a><a class="header-link" href="/dashboard">Dashboard</a></div>
+</div>
+{% endblock %}

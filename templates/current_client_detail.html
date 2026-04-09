@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="grid-hero" style="margin-bottom:18px">
+  <div class="hero-brand">
+    <span class="brand-chip">Current Client</span>
+    <h1 style="margin-top:10px">{{ client.company_en }}</h1>
+    <p class="muted">{{ client.company_ar or client.customer_code or '' }}</p>
+    <div class="quick-actions">
+      <a class="btn btn-secondary fit" href="/current-clients">Back to clients</a>
+      <a class="btn fit" href="/reports">Open reports</a>
+    </div>
+  </div>
+  <div class="sand-card">
+    <div class="tahhan-kicker">Client totals</div>
+    <div class="grid grid-2" style="margin-top:12px">
+      <div class="kpi"><div class="muted">Shipments</div><div class="num">{{ stats.shipments_count or 0 }}</div></div>
+      <div class="kpi"><div class="muted">Containers</div><div class="num">{{ stats.total_containers or 0 }}</div></div>
+      <div class="kpi"><div class="muted">Cartons</div><div class="num">{{ stats.total_cartons or 0 }}</div></div>
+      <div class="kpi"><div class="muted">Invoice Total</div><div class="num">{{ '%.0f'|format(stats.total_invoice_amount or 0) }}</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h3 style="margin-top:0">Client Details</h3>
+    <div class="detail-list">
+      <div class="detail-row"><span>Customer code</span><strong>{{ client.customer_code or '-' }}</strong></div>
+      <div class="detail-row"><span>Country</span><strong>{{ client.country or '-' }}</strong></div>
+      <div class="detail-row"><span>Arabic name</span><strong>{{ client.company_ar or '-' }}</strong></div>
+      <div class="detail-row"><span>Address</span><strong>{{ client.address or '-' }}</strong></div>
+      <div class="detail-row"><span>ICE</span><strong>{{ client.ice or '-' }}</strong></div>
+      <div class="detail-row"><span>Bank</span><strong>{{ client.bank_name or '-' }}</strong></div>
+      <div class="detail-row"><span>SWIFT</span><strong>{{ client.swift_code or '-' }}</strong></div>
+      <div class="detail-row"><span>IBAN / Account</span><strong class="pre">{{ client.iban_account or '-' }}</strong></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="topbar" style="margin-bottom:12px"><h3 style="margin:0">Add Invoice / Document</h3></div>
+    <form method="post" action="/current-client/{{ client.id }}/invoice" enctype="multipart/form-data" class="grid">
+      <div class="grid grid-4">
+        <input name="invoice_no" placeholder="Invoice number">
+        <input type="date" name="invoice_date">
+        <input type="number" step="0.01" name="amount" placeholder="Amount">
+        <input name="currency" value="USD" placeholder="Currency">
+      </div>
+      <textarea name="notes" placeholder="Notes"></textarea>
+      <input type="file" name="file" accept=".pdf,image/*">
+      <button type="submit">Save invoice</button>
+    </form>
+    <div class="soft-line" style="margin:14px 0"></div>
+    <h4 style="margin:0 0 10px 0">Item Mix</h4>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th>Item</th><th>Containers</th><th>Cartons</th><th>Amount</th></tr>
+        {% for r in item_mix %}
+        <tr><td>{{ r.item_label }}</td><td>{{ r.containers }}</td><td>{{ r.cartons }}</td><td>{{ r.amount }}</td></tr>
+        {% else %}<tr><td colspan="4" class="muted">No shipment analytics yet.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="topbar" style="margin-bottom:12px"><h3 style="margin:0">Shipment History</h3><a class="btn btn-secondary" href="/shipments">Open all shipments</a></div>
+  <div class="table-wrap">
+    <table class="table">
+      <tr><th>Booking / Shipment</th><th>Item</th><th>Containers</th><th>Cartons</th><th>Invoice</th><th>Status</th><th>Open</th></tr>
+      {% for s in shipments %}
+      <tr>
+        <td>{{ s.shipment_no }}</td>
+        <td><div class="small muted">{{ s.product_category or '-' }}</div>{{ s.item_name or s.product_name or '-' }}</td>
+        <td>{{ s.container_count or 0 }} {{ s.container_type or '' }}</td>
+        <td>{{ s.cartons_count or 0 }}</td>
+        <td>{{ s.invoice_amount or 0 }} {{ s.currency or 'USD' }}</td>
+        <td><span class="badge">{{ s.current_status }}</span></td>
+        <td><a class="btn btn-secondary" href="/shipment/{{ s.id }}">Open</a></td>
+      </tr>
+      {% else %}<tr><td colspan="7" class="muted">No shipments linked to this client yet.</td></tr>{% endfor %}
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <h3 style="margin-top:0">Invoices / Attachments</h3>
+  <div class="table-wrap">
+    <table class="table">
+      <tr><th>#</th><th>Date</th><th>Amount</th><th>Notes</th><th>Attachment</th><th>By</th></tr>
+      {% for inv in invoices %}
+      <tr>
+        <td>{{ inv.invoice_no }}</td>
+        <td>{{ inv.invoice_date }}</td>
+        <td>{{ inv.amount }} {{ inv.currency }}</td>
+        <td>{{ inv.notes }}</td>
+        <td>{% if inv.attachment_filename %}<a href="/uploads/clients/{{ inv.attachment_filename }}" target="_blank">{{ inv.attachment_original_name or 'Open' }}</a>{% else %}-{% endif %}</td>
+        <td>{{ inv.created_by }}</td>
+      </tr>
+      {% else %}<tr><td colspan="6" class="muted">No invoices yet.</td></tr>{% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

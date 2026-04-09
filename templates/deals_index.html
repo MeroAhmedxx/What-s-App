@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><div><h1>Customer Deals</h1><div class="muted small">All client-specific deals created under shipments.</div></div><div class="row"><a class="btn btn-secondary" href="/shipments">Shipments</a></div></div>
+<div class="card">
+  <form method="get" action="/export/deals" class="row" style="justify-content:space-between;gap:12px"><input style="flex:1" name="q" value="{{ q }}" placeholder="Search invoice, client, product or shipment"><button type="submit" class="fit">Search</button></form>
+</div>
+<div class="card" style="margin-top:18px">
+  <table class="table">
+    <tr><th>Invoice</th><th>Client</th><th>Shipment</th><th>Product</th><th>Amount</th><th>Status</th><th></th></tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.invoice_no or '-' }}<div class="small muted">{{ r.invoice_date or '-' }}</div></td>
+      <td>{{ r.client_name or '-' }}</td>
+      <td>{{ r.shipment_no or '-' }}<div class="small muted">{{ r.origin_port or '-' }} → {{ r.destination_port or '-' }}</div></td>
+      <td>{{ r.product_name or '-' }}</td>
+      <td>{{ '%.2f'|format(r.total_amount or 0) }} {{ r.currency or 'USD' }}</td>
+      <td><span class="badge">{{ r.status or 'Draft' }}</span></td>
+      <td><a class="btn" href="/deal/{{ r.id }}">Open</a></td>
+    </tr>
+    {% else %}<tr><td colspan="7" class="muted">No deals yet.</td></tr>{% endfor %}
+  </table>
+</div>
+{% endblock %}

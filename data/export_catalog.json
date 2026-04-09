@@ -1,0 +1,149 @@
+{
+  "products": [
+    {
+      "product_name": "Egyptian Dates",
+      "category": "Natural Dates",
+      "origin_country": "Egypt",
+      "packaging": "Bulk and retail packs",
+      "price_band": "Mid to premium",
+      "target_markets": "Europe, GCC, Africa",
+      "market_fit": "Core export line for importers and retail distributors.",
+      "notes": "Cultivated in Egypt; the brochure highlights New Valley Governorate and medium-to-large sizing.",
+      "sort_order": 10
+    },
+    {
+      "product_name": "Saudi Dates",
+      "category": "Premium Dates",
+      "origin_country": "Saudi Arabia",
+      "packaging": "Bulk and premium retail",
+      "price_band": "Premium",
+      "target_markets": "GCC, premium retail",
+      "market_fit": "Strong fit for premium shelves and gifting channels.",
+      "notes": "Premium assortment for Gulf-facing channels.",
+      "sort_order": 20
+    },
+    {
+      "product_name": "Chocolate Dates Packs",
+      "category": "Value-added snacks",
+      "origin_country": "Egypt",
+      "packaging": "12-pack retail boxes",
+      "price_band": "Premium impulse",
+      "target_markets": "Retail chains, gifting, travel retail",
+      "market_fit": "Good for modern trade and seasonal promotions.",
+      "notes": "The brochure shows multiple chocolate date pack SKUs and 12-pack configurations.",
+      "sort_order": 30
+    },
+    {
+      "product_name": "Egyptian Delights",
+      "category": "Mix Chocolate Dates",
+      "origin_country": "Egypt",
+      "packaging": "550 gm tins",
+      "price_band": "Premium gifting",
+      "target_markets": "Gift channels, modern retail, seasonal offers",
+      "market_fit": "Strong visual product for gifting and festive campaigns.",
+      "notes": "Presented in the brochure as a 550 gm mix chocolate dates pack.",
+      "sort_order": 40
+    },
+    {
+      "product_name": "Dates Box",
+      "category": "Mix Fruits Chocolate Dates",
+      "origin_country": "Egypt",
+      "packaging": "600 gm tins",
+      "price_band": "Premium gifting",
+      "target_markets": "Retail, gifting, family offers",
+      "market_fit": "Suitable for mixed fruit-chocolate proposition.",
+      "notes": "Presented in the brochure as a 600 gm mix fruits chocolate dates box.",
+      "sort_order": 50
+    },
+    {
+      "product_name": "Date Syrup",
+      "category": "Processed dates",
+      "origin_country": "Egypt",
+      "packaging": "250 gm, 350 gm, 400 gm, 500 gm",
+      "price_band": "Mass to premium",
+      "target_markets": "Food service, factories, healthy retail",
+      "market_fit": "Useful for B2B ingredients and consumer healthy-food segments.",
+      "notes": "The brochure shows multiple date syrup pack sizes from 250 gm to 500 gm.",
+      "sort_order": 60
+    },
+    {
+      "product_name": "Premium Maamoul",
+      "category": "Bakery and filled dates",
+      "origin_country": "Egypt",
+      "packaging": "Retail boxes",
+      "price_band": "Premium seasonal",
+      "target_markets": "GCC, ethnic retail, festive seasons",
+      "market_fit": "Excellent for Ramadan and festive demand.",
+      "notes": "Featured in the product portfolio as a premium packaged item.",
+      "sort_order": 70
+    }
+  ],
+  "markets": [
+    {
+      "country_name": "Germany",
+      "region_name": "Europe",
+      "demand_level": "High",
+      "price_position": "Premium",
+      "preferred_products": "Egyptian Dates, Date Syrup, Chocolate Dates Packs",
+      "buyer_types": "Importers, organic/ethnic distributors, modern retail",
+      "entry_points": "Private label, premium ethnic shelves, ingredient buyers",
+      "market_notes": "Quality assurance and stable documentation matter most.",
+      "sort_order": 10
+    },
+    {
+      "country_name": "France",
+      "region_name": "Europe",
+      "demand_level": "High",
+      "price_position": "Premium",
+      "preferred_products": "Egyptian Dates, Chocolate Dates Packs, Date Syrup",
+      "buyer_types": "Importers, premium grocery, gifting",
+      "entry_points": "Seasonal campaigns and branded retail packs",
+      "market_notes": "Brand story and presentation help premium conversion.",
+      "sort_order": 20
+    },
+    {
+      "country_name": "Saudi Arabia",
+      "region_name": "GCC",
+      "demand_level": "High",
+      "price_position": "Premium",
+      "preferred_products": "Saudi Dates, Premium Maamoul, Chocolate Dates Packs",
+      "buyer_types": "Retail chains, distributors, gifting buyers",
+      "entry_points": "Ramadan, gifting, premium food retail",
+      "market_notes": "Premium positioning and Islamic seasonality are strong levers.",
+      "sort_order": 30
+    },
+    {
+      "country_name": "United Arab Emirates",
+      "region_name": "GCC",
+      "demand_level": "High",
+      "price_position": "Premium",
+      "preferred_products": "Chocolate Dates Packs, Date Syrup, Egyptian Delights",
+      "buyer_types": "Travel retail, gifting, supermarket chains",
+      "entry_points": "Premium packaging and seasonal displays",
+      "market_notes": "Great market for premium storytelling and gifting packs.",
+      "sort_order": 40
+    },
+    {
+      "country_name": "Morocco",
+      "region_name": "North Africa",
+      "demand_level": "Medium",
+      "price_position": "Mid",
+      "preferred_products": "Egyptian Dates, Date Syrup",
+      "buyer_types": "Importers, wholesalers, industrial food buyers",
+      "entry_points": "Bulk offers and B2B trade relationships",
+      "market_notes": "Price competitiveness and reliable lead times matter.",
+      "sort_order": 50
+    },
+    {
+      "country_name": "India",
+      "region_name": "Asia",
+      "demand_level": "High",
+      "price_position": "Mid",
+      "preferred_products": "Egyptian Dates, Date Syrup",
+      "buyer_types": "Importers, wholesalers, food processing",
+      "entry_points": "Bulk shipments and distributor partnerships",
+      "market_notes": "Large volume potential with value-conscious negotiations.",
+      "sort_order": 60
+    }
+  ]
+}

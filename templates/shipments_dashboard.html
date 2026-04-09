@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+.ship-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.ship-card{position:relative;overflow:hidden}
+.ship-card .ship-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.ship-progress{height:10px;background:rgba(255,255,255,.16);border-radius:999px;overflow:hidden;margin:12px 0 8px}
+.ship-progress > div{height:100%;background:linear-gradient(90deg,#f2c56c,#c79a3f);border-radius:999px;transition:width .4s ease}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.status-badge.done{background:#dcfce7;color:#166534}.status-badge.danger{background:#fee2e2;color:#991b1b}.status-badge.sea{background:#fdecc8;color:#6a4105}.status-badge.active{background:#ffe9b6;color:#7a3004}.status-badge.pending{background:#f0e0d0;color:#5d3a27}
+.ship-journey{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:12px}
+.ship-step{position:relative;text-align:center;font-size:11px;color:#dbc5aa}
+.ship-step .dot{width:14px;height:14px;border-radius:999px;background:#d1d5db;margin:0 auto 8px;position:relative}
+.ship-step.done .dot{background:#24b36b}.ship-step.current .dot{background:#f2c56c;box-shadow:0 0 0 8px rgba(242,197,108,.18);animation:pulse 1.8s infinite}.ship-step.upcoming .dot{background:#c8ac8d}
+.ship-mini{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.ship-mini .mini{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:10px}.ship-mini .mini .muted{color:#e9d5b7!important}.ship-mini .mini .value{color:#fff7e7;font-weight:800}.ship-mini .mini.docs .value{color:#ffd978}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(37,99,235,.25)}70%{box-shadow:0 0 0 10px rgba(37,99,235,0)}100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}}
+</style>
+<div class="grid-hero"><div class="hero-brand"><div class="tahhan-kicker">Shipment operations</div><h1>Shipments Dashboard</h1><div class="muted">A visual board for export and import work: shipment stage, ETA, missing documents, overdue follow-ups and operational gaps in one view.</div><div class="row" style="margin-top:14px"><span class="brand-chip">Journey timeline</span><span class="brand-chip">Missing docs</span><span class="brand-chip">Follow-up focus</span></div></div><div class="sand-card"><h3 style="margin-top:0">Operational view</h3><div class="small muted">Use this board every morning to catch delays, arriving shipments and missing invoice / packing list files before they affect follow-up.</div><div class="row" style="margin-top:12px"><a class="btn fit" href="/shipments">Open Shipments</a><a class="btn btn-secondary fit" href="/followups">Follow-ups</a></div></div></div>
+<div class="grid grid-3">
+  <div class="kpi"><div class="muted">Open Shipments</div><div class="num">{{ stats.open_shipments }}</div></div>
+  <div class="kpi"><div class="muted">Arriving This Week</div><div class="num">{{ stats.arriving_this_week }}</div></div>
+  <div class="kpi"><div class="muted">Delayed</div><div class="num">{{ stats.delayed }}</div></div>
+</div>
+<div class="grid grid-3" style="margin-top:16px">
+  <div class="kpi"><div class="muted">Missing Docs</div><div class="num">{{ stats.missing_docs }}</div></div>
+  <div class="kpi"><div class="muted">Follow-ups Today</div><div class="num">{{ stats.followups_today }}</div></div>
+  <div class="kpi"><div class="muted">Overdue Tasks</div><div class="num">{{ stats.overdue_tasks }}</div></div>
+</div>
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <h3>Action Needed</h3>
+    <table class="table">
+      <tr><th>Type</th><th>Title</th><th>Due</th><th>Status</th></tr>
+      {% for f in followups %}
+      <tr><td>{{ f.entity_type }}</td><td>{{ f.title }}</td><td>{% if f.followup_at and f.followup_at > 0 %}{{ f.followup_at|int|datetimeformat }}{% else %}-{% endif %}</td><td><span class="badge">{{ f.status }}</span></td></tr>
+      {% else %}<tr><td colspan="4" class="muted">No open follow-ups right now.</td></tr>{% endfor %}
+    </table>
+  </div>
+  <div class="card">
+    <h3>How to read this board</h3>
+    <div class="pre">Booked → Loaded → Sailed → At Sea → Arrived → Customs → Delivered → Closed
+
+Green = completed step
+Blue pulse = current live step
+Red = delayed ETA
+Missing docs badge = invoice / packing list still incomplete</div>
+  </div>
+</div>
+<div class="ship-grid" style="margin-top:18px">
+  {% for s in shipments %}
+  {% set current_idx = status_steps.index(s.current_status) if s.current_status in status_steps else 0 %}
+  <div class="card ship-card">
+    <div class="ship-top">
+      <div>
+        <div class="muted small">{{ s.trade_type }} · {{ s.shipment_no }}</div>
+        <h3 style="margin:6px 0">{{ s.company or s.supplier or 'Shipment' }}</h3>
+        <div class="muted small">{{ s.product_name or '-' }} · {{ s.origin_port or '-' }} → {{ s.destination_port or '-' }}</div>
+      </div>
+      <span class="status-badge {{ s.meta.badge }}">{{ s.current_status }}</span>
+    </div>
+    <div class="ship-progress"><div style="width:{{ s.meta.progress }}%"></div></div>
+    <div class="muted small">{{ s.meta.summary }}{% if s.meta.remaining_days is not none %} · {{ s.meta.remaining_days }} day(s) to ETA{% endif %}</div>
+    <div class="ship-journey">
+      {% for step in status_steps %}
+      {% set idx = loop.index0 %}
+      <div class="ship-step {% if idx < current_idx %}done{% elif idx == current_idx %}current{% else %}upcoming{% endif %}">
+        <div class="dot"></div>
+        <div>{{ step }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="ship-mini">
+      <div class="mini"><div class="muted small">ETD</div><div class="value">{% if s.etd_at and s.etd_at > 0 %}{{ s.etd_at|int|datetimeformat }}{% else %}-{% endif %}</div></div>
+      <div class="mini"><div class="muted small">ETA</div><div class="value">{% if s.eta_at and s.eta_at > 0 %}{{ s.eta_at|int|datetimeformat }}{% else %}-{% endif %}</div></div>
+      <div class="mini docs"><div class="muted small">Docs</div><div class="value">Invoice {{ s.docs.get('invoice',0) }} / Packing {{ s.docs.get('packing_list',0) }}</div></div>
+      <div class="mini"><div class="muted small">Assigned</div><div class="value">{{ s.assigned_to or '-' }}</div></div>
+    </div>
+    {% if s.missing_items %}<div class="alert warn" style="margin-top:12px">Missing: {{ s.missing_items }}</div>{% endif %}
+    <div class="row" style="margin-top:12px"><a class="btn fit" href="/shipment/{{ s.id }}">Open details</a><a class="btn btn-secondary fit" href="/shipments">All shipments</a></div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

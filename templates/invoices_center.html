@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Invoices Center</h1></div>
+<div class="card"><table class="table"><tr><th>Source</th><th>Invoice</th><th>Entry</th><th>Preview</th><th>Created By</th><th>Created</th></tr>
+{% for r in rows %}<tr><td>{{ r.source_type }} · {{ r.source_label or ('#' ~ r.source_id) }}</td><td>{{ r.title or '-' }}</td><td>{{ r.entry_mode }}</td><td>{% if r.filename %}{% if r.source_type == 'shipment' %}<a href="/uploads/shipments/{{ r.filename }}" target="_blank">Open</a>{% else %}<a href="/uploads/clients/{{ r.filename }}" target="_blank">Open</a>{% endif %}{% else %}<span class="muted small">{{ (r.manual_text or '-')[:120] }}</span>{% endif %}</td><td>{{ r.created_by or '-' }}</td><td>{{ r.created_at|int|datetimeformat if r.created_at else '-' }}</td></tr>{% else %}<tr><td colspan="6">No invoices yet.</td></tr>{% endfor %}</table></div>
+{% endblock %}

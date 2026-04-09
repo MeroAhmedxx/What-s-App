@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Bridge Monitor</h1></div>
+<div class="card">
+  <table class="table">
+    <tr><th>User</th><th>Device</th><th>Outlook Email</th><th>Status</th><th>Last Seen</th><th>Pending Jobs</th><th>Token</th></tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.username }}</td>
+      <td>{{ r.device_name or '-' }}</td>
+      <td>{{ r.outlook_account_email or '-' }}</td>
+      <td>{% if r.online %}<span class="badge" style="background:#10351f;color:#6ee7b7">Online{% else %}<span class="badge" style="background:#3b1b1b;color:#fca5a5">Offline{% endif %}</span></td>
+      <td>{{ r.last_seen_at|int|datetimeformat if r.last_seen_at else '-' }}</td>
+      <td>{{ r.pending_jobs }}</td>
+      <td class="small muted">{{ (r.device_token or '')[:10] }}...</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

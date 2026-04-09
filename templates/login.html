@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ branding.app_title }} · Login</title>
+  <link rel="stylesheet" href="/static/style.css?v=tradeflow-v15">
+  <script src="/static/lang/translator.js?v=3"></script>
+  <style>
+    .login-shell{min-height:100vh;padding:24px;background:radial-gradient(circle at top right,rgba(242,197,108,.12),transparent 24%),linear-gradient(180deg,#2a130d,#1a100c 45%,#140d0a)}
+    .login-top{max-width:1120px;margin:0 auto 22px;display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}
+    .login-layout{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:22px;align-items:stretch}
+    .login-story{padding:28px;border-radius:26px;background:linear-gradient(135deg,rgba(139,30,23,.94),rgba(55,22,13,.98));border:1px solid rgba(242,197,108,.28);position:relative;overflow:hidden}
+    .login-story:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 82% 18%,rgba(242,197,108,.14),transparent 24%),linear-gradient(120deg,transparent 0 56%,rgba(255,255,255,.04) 57% 62%,transparent 63% 100%);pointer-events:none}
+    .login-box{width:100%;max-width:none;margin:0;padding:26px}
+    .login-points{display:grid;gap:12px;margin-top:18px}
+    .login-point{padding:14px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06)}
+    .login-form-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .login-note{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);margin-top:14px}
+    @media (max-width: 980px){.login-layout{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="login-shell">
+  <div class="login-top">
+    <div class="brand-block" style="margin:0">
+      <img src="/static/assets/logo.png" alt="{{ branding.company_name }}" class="brand-logo">
+      <div>
+        <div class="brand-name">{{ branding.product_name }}</div>
+        <div class="muted small">{{ branding.edition_name }} · {{ branding.company_name }}</div>
+      </div>
+    </div>
+    <div class="login-form-actions">
+      <select id="lang-switcher" class="lang-switcher" onchange="setLang(this.value)">
+        <option value="en">EN</option>
+        <option value="ar">AR</option>
+      </select>
+      <a class="btn btn-secondary" href="/tour" data-i18n="Product Tour">Product Tour</a>
+      <a class="btn btn-secondary" href="/" data-i18n="Back to intro">Back to intro</a>
+    </div>
+  </div>
+
+  <div class="login-layout">
+    <section class="login-story">
+      <div class="eyebrow">{{ branding.login_title }}</div>
+      <h1 style="font-size:38px;line-height:1.06;margin:12px 0 10px" data-i18n="A polished workspace for leads, outreach, shipments and trade follow-up.">A polished workspace for leads, outreach, shipments and trade follow-up.</h1>
+      <p class="muted" style="max-width:760px">{{ branding.login_subtitle }} <span data-i18n="Use your company account to enter the Altahhan edition today while keeping a reusable product direction for future clients.">Use your company account to enter the Altahhan edition today while keeping a reusable product direction for future clients.</span></p>
+      <div class="login-points">
+        <div class="login-point"><b data-i18n="CRM + pipeline">CRM + pipeline</b><div class="muted small" data-i18n="Leads, stage tracking, current clients and follow-up visibility.">Leads, stage tracking, current clients and follow-up visibility.</div></div>
+        <div class="login-point"><b data-i18n="Outreach Hub">Outreach Hub</b><div class="muted small" data-i18n="Profiles, templates, campaigns, logs, tracking and Outlook bridge support.">Profiles, templates, campaigns, logs, tracking and Outlook bridge support.</div></div>
+        <div class="login-point"><b data-i18n="Operations layer">Operations layer</b><div class="muted small" data-i18n="Shipments, documents, invoices, packing lists and internal coordination.">Shipments, documents, invoices, packing lists and internal coordination.</div></div>
+      </div>
+    </section>
+
+    <section class="card login-box">
+      <div class="login-brand">
+        <img src="/static/assets/logo.png" alt="{{ branding.company_name }}" class="login-logo">
+        <div>
+          <div class="brand-name">{{ branding.product_name }}</div>
+          <div class="muted small">{{ branding.edition_name }}</div>
+        </div>
+      </div>
+      <p class="muted" data-i18n="Sign in to continue to the bilingual export and import workspace.">Sign in to continue to the bilingual export and import workspace.</p>
+      <form method="post" action="/login" class="grid">
+        <input name="username" placeholder="Username" data-i18n-placeholder="Username" required>
+        <input name="password" type="password" placeholder="Password" data-i18n-placeholder="Password" required>
+        <button type="submit" data-i18n="Login">Login</button>
+      </form>
+      {% if error %}<p style="color:#fca5a5">{{ error }}</p>{% endif %}
+      <div class="login-note small muted" data-i18n="Use your assigned employee account. For production deployment, rotate any bootstrap password and keep mail profiles per user.">
+        Use your assigned employee account. For production deployment, rotate any bootstrap password and keep mail profiles per user.
+      </div>
+    </section>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar">
+  <h1>Task #{{ task.id }}</h1>
+  <div class="actions"><a class="btn btn-secondary" href="/tasks">Back to Tasks</a></div>
+</div>
+{% set success = request.query_params.get('success') %}
+{% if success %}<div class="card alert ok">Saved successfully.</div>{% endif %}
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Edit Task</h3>
+    <form method="post" action="/tasks/{{ task.id }}/update" class="grid">
+      <input name="title" value="{{ task.title }}" required>
+      <textarea name="description">{{ task.description }}</textarea>
+      <div class="grid grid-3">
+        <select name="assigned_to">
+          <option value="">Unassigned</option>
+          <option value="__all__" {% if task.assigned_to == "__all__" %}selected{% endif %}>Everyone</option>
+          {% for u in users %}<option value="{{ u.username }}" {% if task.assigned_to == u.username %}selected{% endif %}>{{ u.display_name or u.username }}</option>{% endfor %}
+        </select>
+        <select name="priority">
+          {% for p in ['Low','Medium','High','Urgent'] %}<option value="{{ p }}" {% if task.priority == p %}selected{% endif %}>{{ p }}</option>{% endfor %}
+        </select>
+        <input type="date" name="due_date" value="{% if task.due_at and task.due_at > 0 %}{{ task.due_at|int|datetimeformat }}{% endif %}">
+      </div>
+      <button type="submit">Save Changes</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Task Snapshot</h3>
+    <div class="grid">
+      <div><span class="muted">Assigned to:</span> {{ 'Everyone' if task.assigned_to == '__all__' else (task.assigned_to or '-') }}</div>
+      <div><span class="muted">Created by:</span> {{ task.created_by or '-' }}</div>
+      <div><span class="muted">Status:</span> <span class="badge">{{ task.status }}</span></div>
+      <div><span class="muted">Priority:</span> <span class="badge priority-{{ (task.priority or 'Medium').lower().replace(' ','-') }}">{{ task.priority }}</span></div>
+      <div><span class="muted">Due date:</span> {% if task.due_at and task.due_at > 0 %}<span class="date-epoch">{{ task.due_at|int }}</span>{% else %}-{% endif %}</div>
+    </div>
+    <div style="margin-top:14px">
+      <form method="post" action="/tasks/{{ task.id }}/status" class="row">
+        <select name="status">
+          {% for s in ['Open','In Progress','Waiting','Done'] %}<option value="{{ s }}" {% if task.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+        </select>
+        <button type="submit" class="fit">Update Status</button>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <h3>Add Comment</h3>
+    <form method="post" action="/tasks/{{ task.id }}/comment" class="grid">
+      <textarea name="body" placeholder="Add internal note or execution update" required></textarea>
+      <button type="submit">Post Comment</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Comments</h3>
+    {% for c in comments %}
+      <div class="comment-box">
+        <div class="small muted">{{ c.author }}</div>
+        <div class="pre">{{ c.body }}</div>
+      </div>
+    {% else %}
+      <div class="muted">No comments yet.</div>
+    {% endfor %}
+  </div>
+</div>
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <h3>Upload Attachment</h3>
+    <form method="post" action="/tasks/{{ task.id }}/upload" enctype="multipart/form-data" class="grid">
+      <input type="file" name="file" accept=".pdf,image/*" required>
+      <input name="note" placeholder="Short note about this file">
+      <button type="submit">Upload file</button>
+    </form>
+    <div style="margin-top:14px">
+      {% for a in attachments %}<div><a target="_blank" href="/uploads/tasks/{{ a.filename }}">{{ a.original_name or a.filename }}</a>{% if a.note %} — {{ a.note }}{% endif %}</div>{% else %}<div class="muted">No files yet.</div>{% endfor %}
+    </div>
+  </div>
+  <div class="card">
+    <h3>Add Follow-up Reminder</h3>
+    <form method="post" action="/tasks/{{ task.id }}/followup/add" class="grid">
+      <input name="title" placeholder="Reminder title" required>
+      <textarea name="notes" placeholder="What should be done?"></textarea>
+      <div class="grid grid-3"><input type="date" name="followup_date"><select name="priority"><option>Low</option><option selected>Medium</option><option>High</option><option>Urgent</option></select><select name="assigned_to"><option value="">Unassigned</option>{% for u in users %}<option value="{{ u.username }}">{{ u.display_name or u.username }}</option>{% endfor %}</select></div>
+      <button type="submit">Create Reminder</button>
+    </form>
+    <table class="table" style="margin-top:12px"><tr><th>Title</th><th>Due</th><th>Status</th></tr>{% for f in followups %}<tr><td>{{ f.title }}</td><td>{% if f.followup_at and f.followup_at > 0 %}{{ f.followup_at|int|datetimeformat }}{% else %}-{% endif %}</td><td>{{ f.status }}</td></tr>{% else %}<tr><td colspan="3" class="muted">No reminders yet.</td></tr>{% endfor %}</table>
+  </div>
+</div>
+<script>
+document.querySelectorAll('.date-epoch').forEach(td => {
+  const raw = td.textContent.trim();
+  if(/^[0-9]+$/.test(raw) && Number(raw) > 0){
+    const d = new Date(Number(raw) * 1000);
+    td.textContent = d.toLocaleDateString();
+  }
+});
+</script>
+{% endblock %}

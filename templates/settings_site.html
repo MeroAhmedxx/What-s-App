@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar">
+  <h1>Domain & Image Uploads</h1>
+</div>
+{% if message %}<div class="card" style="border-color:#2ec27e;color:#9ee6bf;word-break:break-all">{{ message }}</div>{% endif %}
+{% if error %}<div class="card" style="border-color:#b91c1c;color:#ffb4b4">{{ error }}</div>{% endif %}
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Public domain</h3>
+    <form method="post" action="/settings/site" class="grid grid-2">
+      <div class="grid" style="grid-column:1 / -1">
+        <label>Domain used</label>
+        <input name="domain" value="{{ settings.domain|default('') }}" placeholder="crm.yourdomain.com or https://crm.yourdomain.com">
+      </div>
+      <div class="grid" style="grid-column:1 / -1">
+        <label>Image upload path prefix</label>
+        <input name="image_prefix" value="{{ settings.image_prefix|default('/uploads') }}" placeholder="/uploads">
+      </div>
+      <div style="grid-column:1 / -1"><button type="submit">Save site settings</button></div>
+    </form>
+    <table class="table">
+      <tr><th>Resolved base URL</th><td style="word-break:break-all">{{ domain_base }}</td></tr>
+      <tr><th>Image base URL</th><td style="word-break:break-all">{{ image_base }}</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Upload image & get full URL</h3>
+    <form method="post" action="/settings/site/upload-image" enctype="multipart/form-data" class="row">
+      <input type="file" name="image" accept="image/*" required>
+      <button type="submit" class="fit">Upload image</button>
+    </form>
+    <p class="muted small">After upload, the page returns the full image URL using your configured domain prefix.</p>
+    <h4>Recent uploaded files</h4>
+    <table class="table">
+      <tr><th>File</th><th>Public URL</th></tr>
+      {% for file in files %}
+      <tr>
+        <td>{{ file }}</td>
+        <td style="word-break:break-all"><a href="{{ image_base }}/{{ file }}" target="_blank">{{ image_base }}/{{ file }}</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="2" class="muted">No images uploaded yet.</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><div><h1 data-i18n="Inbox Sync">Inbox Sync</h1><div class="muted small" data-i18n="Pull recent Outlook replies via Microsoft Graph and convert them into reply events that stop automation.">Pull recent Outlook replies via Microsoft Graph and convert them into reply events that stop automation.</div></div></div>
+<div class="grid grid-2">
+  <div class="card">
+    <h3 data-i18n="Run sync">Run sync</h3>
+    <form method="post" action="/campaign-v2/inbox-sync/run" class="grid">
+      <select name="profile_id" required>
+        <option value="">Select a sending profile</option>
+        {% for p in profiles %}
+        <option value="{{ p.id }}">{{ p.profile_name }} — {{ p.provider }} — {{ p.from_email or p.account_email or '-' }}</option>
+        {% endfor %}
+      </select>
+      <input type="number" name="max_messages" value="20" min="1" max="50" placeholder="Messages to scan">
+      <button type="submit" data-i18n="Sync Outlook inbox">Sync Outlook inbox</button>
+    </form>
+    <div class="small muted" style="margin-top:10px" data-i18n="Best path: connect Microsoft 365 on the Profiles page, use a Microsoft Graph profile, then run sync here.">Best path: connect Microsoft 365 on the Profiles page, use a Microsoft Graph profile, then run sync here.</div>
+  </div>
+  <div class="card">
+    <h3 data-i18n="What it does">What it does</h3>
+    <ul class="small muted" style="line-height:1.8">
+      <li data-i18n="Reads recent inbox messages from Microsoft Graph">Reads recent inbox messages from Microsoft Graph</li>
+      <li data-i18n="Matches sender emails with campaign recipients and sequence enrollments">Matches sender emails with campaign recipients and sequence enrollments</li>
+      <li data-i18n="Logs reply events in Replies & Suppression">Logs reply events in Replies & Suppression</li>
+      <li data-i18n="Stops future follow-up by marking rows as replied">Stops future follow-up by marking rows as replied</li>
+      <li data-i18n="Creates a high-priority task so the sales owner follows up fast">Creates a high-priority task so the sales owner follows up fast</li>
+    </ul>
+  </div>
+</div>
+<div class="card" style="margin-top:18px">
+  <h3 data-i18n="Recent Graph reply events">Recent Graph reply events</h3>
+  <div class="table-wrap">
+    <table class="table">
+      <tr><th data-i18n="Time">Time</th><th data-i18n="Email">Email</th><th data-i18n="Type">Type</th><th data-i18n="Details">Details</th></tr>
+      {% for row in inbox_rows %}
+      <tr><td>{{ row.created_at|int }}</td><td>{{ row.email }}</td><td>{{ row.event_type }}</td><td>{{ row.details }}</td></tr>
+      {% else %}<tr><td colspan="4" class="muted" data-i18n="No Graph reply events yet.">No Graph reply events yet.</td></tr>{% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><div><h1 data-i18n="Product Settings">Product Settings</h1><div class="muted small" data-i18n="This is the white-label layer: update these fields to reuse the same product for another company or country.">This is the white-label layer: update these fields to reuse the same product for another company or country.</div></div></div>
+<form method="post" action="/product-settings" class="card grid">
+  <div class="grid grid-2">
+    <div><label data-i18n="Product name">Product name</label><input name="product_name" value="{{ profile.product_name }}" required></div>
+    <div><label data-i18n="Edition name">Edition name</label><input name="edition_name" value="{{ profile.edition_name }}" required></div>
+    <div><label data-i18n="Company name">Company name</label><input name="company_name" value="{{ profile.company_name }}" required></div>
+    <div><label data-i18n="App title">App title</label><input name="app_title" value="{{ profile.app_title }}" required></div>
+    <div><label data-i18n="Primary market">Primary market</label><input name="primary_market" value="{{ profile.primary_market }}" required></div>
+    <div><label data-i18n="Outreach workspace name">Outreach workspace name</label><input name="outreach_name" value="{{ profile.outreach_name }}" required></div>
+  </div>
+  <div><label data-i18n="Hero tagline">Hero tagline</label><input name="hero_tagline" value="{{ profile.hero_tagline }}" required></div>
+  <div><label data-i18n="Login title">Login title</label><input name="login_title" value="{{ profile.login_title }}" required></div>
+  <div><label data-i18n="Login subtitle">Login subtitle</label><textarea name="login_subtitle" required>{{ profile.login_subtitle }}</textarea></div>
+  <div><label data-i18n="Landing tagline">Landing tagline</label><textarea name="landing_tagline" required>{{ profile.landing_tagline }}</textarea></div>
+  <div><label data-i18n="Support label">Support label</label><input name="support_label" value="{{ profile.support_label }}" required></div>
+  <button type="submit" class="btn" data-i18n="Save product settings">Save product settings</button>
+</form>
+{% endblock %}

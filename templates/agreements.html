@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar">
+  <h1>Global Agreements & Trade Laws</h1>
+  <div class="actions">
+    <a class="btn" href="/agreements?category=agreement">Agreements</a>
+    <a class="btn-secondary btn" href="/agreements?category=law">Laws</a>
+    <a class="btn" href="/reports">Reports</a>
+  </div>
+</div>
+
+<div class="card">
+  <form method="get" class="grid grid-4">
+    <input name="q" value="{{ q }}" placeholder="Search agreement, law, origin rule, partner, source">
+    <select name="category">
+      <option value="all" {% if category == 'all' %}selected{% endif %}>All categories</option>
+      <option value="agreement" {% if category == 'agreement' %}selected{% endif %}>Agreements</option>
+      <option value="law" {% if category == 'law' %}selected{% endif %}>Laws & regulations</option>
+    </select>
+    <select name="region">
+      <option value="">All regions</option>
+      {% for r in regions %}<option value="{{ r.region }}" {% if region_filter == r.region %}selected{% endif %}>{{ r.region }}</option>{% endfor %}
+    </select>
+    <input name="country" value="{{ country }}" placeholder="Client / country match e.g. Morocco, Germany, UK">
+    <div class="fit"><button type="submit">Search</button></div>
+  </form>
+</div>
+
+<div class="grid grid-4">
+  <div class="kpi"><div class="muted">Results</div><div class="num">{{ rows|length }}</div></div>
+  <div class="kpi"><div class="muted">Agreements</div><div class="num">{{ highlights|length }}</div></div>
+  <div class="kpi"><div class="muted">Country match</div><div class="num">{{ suggested|length }}</div></div>
+  <div class="kpi"><div class="muted">Mode</div><div class="num" style="font-size:18px">{{ category|upper }}</div></div>
+</div>
+
+{% if country and suggested %}
+<div class="card">
+  <h3 style="margin-top:0">Suggested references for {{ country }}</h3>
+  <div class="grid grid-2">
+    {% for item in suggested %}
+    <a class="mini-card" href="/agreement/{{ item.id }}">
+      <div class="muted small">{{ item.category }} · {{ item.region }}</div>
+      <div><strong>{{ item.title }}</strong></div>
+      <div class="muted small">{{ item.partner_countries }}</div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <table class="table">
+    <tr>
+      <th>Title</th><th>Category</th><th>Type</th><th>Region</th><th>Partners</th><th>Year</th><th>Status</th><th>Action</th>
+    </tr>
+    {% for item in rows %}
+    <tr>
+      <td>{{ item.title }}</td>
+      <td>{{ item.category }}</td>
+      <td>{{ item.item_type }}</td>
+      <td>{{ item.region }}</td>
+      <td>{{ item.partner_countries }}</td>
+      <td>{{ item.effective_year }}</td>
+      <td>{{ item.status }}</td>
+      <td><a href="/agreement/{{ item.id }}">Open</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+.quick-action{display:flex;gap:6px;flex-wrap:wrap}
+.quick-action form{display:inline-flex;margin:0}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
+</style>
+<div class="grid-hero" style="margin-bottom:18px">
+  <div class="hero-brand">
+    <span class="brand-chip">Campaign detail</span>
+    <h1>{{ campaign.campaign_name }}</h1>
+    <p class="muted">{{ campaign.status }} · {{ campaign.profile_name or '-' }} · {{ campaign.template_name or '-' }}</p>
+    <div class="row" style="margin-top:10px">
+      <form method="post" action="/campaign-v2/campaign/{{ campaign.id }}/send-now" style="display:flex;gap:8px;align-items:center">
+        <input type="number" name="limit" value="50" min="1" max="500" style="width:110px">
+        <button type="submit">Send now</button>
+      </form>
+      <a class="btn btn-secondary fit" href="/campaign-v2/replies">Reply sync</a>
+    </div>
+  </div>
+  <div class="sand-card">
+    <div class="tahhan-kicker">Campaign notes</div>
+    <div class="small muted">{{ campaign.notes or 'No notes added.' }}</div>
+  </div>
+</div>
+
+<div class="summary-grid">
+  <div class="kpi"><div class="muted">Total</div><div class="num">{{ campaign.total_recipients }}</div></div>
+  <div class="kpi"><div class="muted">Sent</div><div class="num">{{ campaign.sent_count }}</div></div>
+  <div class="kpi"><div class="muted">Opens</div><div class="num">{{ campaign.open_count }}</div></div>
+  <div class="kpi"><div class="muted">Clicks</div><div class="num">{{ campaign.click_count }}</div></div>
+  <div class="kpi"><div class="muted">Replies</div><div class="num">{{ campaign.reply_count }}</div></div>
+  <div class="kpi"><div class="muted">Suppressed / bounced</div><div class="num">{{ suppression_count }}</div></div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Recipients</h3>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th>ID</th><th>Email</th><th>Company</th><th>Status</th><th>Action</th></tr>
+        {% for row in recipients %}
+        <tr>
+          <td>{{ row.id }}</td>
+          <td>{{ row.email }}</td>
+          <td>{{ row.company or '-' }}</td>
+          <td>{{ row.status }}</td>
+          <td>
+            <div class="quick-action">
+              <form method="post" action="/campaign-v2/campaign/{{ campaign.id }}/event/{{ row.id }}"><input type="hidden" name="event_type" value="reply"><button type="submit">Reply</button></form>
+              <form method="post" action="/campaign-v2/campaign/{{ campaign.id }}/event/{{ row.id }}"><input type="hidden" name="event_type" value="bounce"><button type="submit">Bounce</button></form>
+              <form method="post" action="/campaign-v2/campaign/{{ campaign.id }}/event/{{ row.id }}"><input type="hidden" name="event_type" value="unsubscribe"><button type="submit">Unsubscribe</button></form>
+            </div>
+            {% if row.error_message %}<div class="muted small" style="margin-top:6px">{{ row.error_message }}</div>{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="muted">No recipients yet.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Recent events</h3>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th>Event</th><th>Value</th><th>Time</th></tr>
+        {% for e in events %}
+        <tr><td>{{ e.event_type }}</td><td>{{ e.event_value }}</td><td>{{ e.created_at }}</td></tr>
+        {% else %}
+        <tr><td colspan="3" class="muted">No events yet.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Packing Lists</h1></div>
+<div class="card"><table class="table"><tr><th>Shipment</th><th>Company</th><th>Title</th><th>Entry</th><th>Preview</th><th>Created</th></tr>
+{% for r in rows %}<tr><td><a href="/shipment/{{ r.shipment_id }}">{{ r.shipment_no or ('Shipment #' ~ r.shipment_id) }}</a></td><td>{{ r.company or '-' }}</td><td>{{ r.title or '-' }}</td><td>{{ r.entry_mode }}</td><td>{% if r.filename %}<a href="/uploads/shipments/{{ r.filename }}" target="_blank">Open</a>{% else %}<span class="muted small">{{ (r.manual_text or '-')[:120] }}</span>{% endif %}</td><td>{{ r.created_at|int|datetimeformat if r.created_at else '-' }}</td></tr>{% else %}<tr><td colspan="6">No packing lists yet.</td></tr>{% endfor %}</table></div>
+{% endblock %}

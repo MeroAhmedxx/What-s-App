@@ -1,0 +1,5 @@
+{
+  "base_url": "https://altahhancrm.onrender.com",
+  "device_token": "PUT_EMPLOYEE_DEVICE_TOKEN_HERE",
+  "poll_seconds": 15
+}

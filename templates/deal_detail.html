@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+.hero-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.hero-box{padding:16px;border:1px solid rgba(202,160,61,.14);border-radius:16px;background:linear-gradient(180deg,var(--panel),var(--panel-2))}.file-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)}.pre-card{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid rgba(202,160,61,.14);border-radius:16px;padding:14px}
+@media(max-width:980px){.hero-grid{grid-template-columns:1fr 1fr}}
+</style>
+<div class="topbar"><div><h1>{{ deal.client_name or 'Customer Deal' }}</h1><div class="muted small">Shipment {{ shipment.shipment_no }} · Invoice {{ deal.invoice_no or '-' }}</div></div><div class="row"><a class="btn btn-secondary" href="/shipment/{{ shipment.id }}">Back to Shipment</a><form method="post" action="/deal/{{ deal.id }}/generate"><button type="submit">Generate Document Pack</button></form></div></div>
+
+<div class="hero-grid">
+  <div class="hero-box"><div class="muted small">Amount</div><strong>{{ '%.2f'|format(payload.total_amount) }} {{ payload.currency }}</strong><div class="small muted">{{ payload.total_amount_words }}</div></div>
+  <div class="hero-box"><div class="muted small">Weights</div><strong>{{ '%.3f'|format(payload.net_weight_ton) }} net / {{ '%.3f'|format(payload.gross_weight_ton) }} gross</strong></div>
+  <div class="hero-box"><div class="muted small">Cartons</div><strong>{{ payload.cartons_count }}</strong></div>
+  <div class="hero-box"><div class="muted small">Payment</div><strong>{{ payload.payment_method }}</strong><div class="small muted">{{ deal.status or 'Draft' }}</div></div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <h3>Deal summary</h3>
+    <table class="table">
+      <tr><th>Client</th><td>{{ payload.client_name }}</td></tr>
+      <tr><th>Address</th><td>{{ payload.client_address }}</td></tr>
+      <tr><th>Invoice</th><td>{{ payload.invoice_no }} · {{ payload.invoice_date }}</td></tr>
+      <tr><th>Booking</th><td>{{ payload.booking_no }}</td></tr>
+      <tr><th>Product</th><td>{{ payload.product_description }}</td></tr>
+      <tr><th>Qty</th><td>{{ '%.3f'|format(payload.qty_ton) }} TON</td></tr>
+      <tr><th>Unit price</th><td>{{ '%.2f'|format(payload.unit_price) }} {{ payload.currency }}</td></tr>
+      <tr><th>Freight</th><td>{{ '%.2f'|format(payload.freight_amount) }} {{ payload.currency }}</td></tr>
+      <tr><th>Ports</th><td>{{ payload.origin_port or '-' }} → {{ payload.destination_port or '-' }}</td></tr>
+      <tr><th>Shipment</th><td>{{ shipment.vessel_name or '-' }}</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>What will be generated</h3>
+    <div class="pre-card">
+      <div><strong>Excel:</strong> invoice + packing list in one workbook</div>
+      <div style="margin-top:6px"><strong>PDF:</strong> invoice/packing PDF via office conversion if available</div>
+      <div style="margin-top:6px"><strong>Payment doc:</strong> {% if payload.payment_method == 'CAD' %}CAD cover{% else %}Bill of exchange{% endif %}</div>
+      <div style="margin-top:6px"><strong>ZIP:</strong> one download containing all generated files</div>
+    </div>
+    <form method="post" action="/deal/{{ deal.id }}/generate" style="margin-top:14px"><button type="submit">Generate now</button></form>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <h3>Generated files</h3>
+  {% if docs %}
+    {% for d in docs %}
+      <div class="file-row">
+        <div><strong>{{ d.document_type|replace('_',' ')|title }}</strong><div class="small muted">{{ d.file_kind|upper }} · {{ d.original_name or d.filename }}</div></div>
+        <a class="btn" target="_blank" href="/uploads/export_docs/{{ d.filename }}">Open</a>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="alert">No generated files yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

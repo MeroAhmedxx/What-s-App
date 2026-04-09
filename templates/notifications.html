@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Notifications</h1><form method="post" action="/notifications/read_all"><button type="submit">Mark all read</button></form></div>
+<div class="card"><table class="table"><tr><th>ID</th><th>Message</th><th>Kind</th><th>Read</th><th>Open</th></tr>{% for r in rows %}<tr><td>{{ r.id }}</td><td>{{ r.message }}</td><td>{{ r.kind }}</td><td>{{ r.is_read }}</td><td><a href="/notifications/go/{{ r.id }}">Open</a></td></tr>{% endfor %}</table></div>
+{% endblock %}

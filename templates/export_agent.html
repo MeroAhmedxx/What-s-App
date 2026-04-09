@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><div><h1 data-i18n="AI Export Agent">AI Export Agent</h1><div class="muted small" data-i18n="Generate a practical offer angle using product-market fit from the Altahhan catalog.">Generate a practical offer angle using product-market fit from the Altahhan catalog.</div></div></div>
+<div class="grid grid-2">
+  <div class="card">
+    <h3 data-i18n="Brief the agent">Brief the agent</h3>
+    <form method="get" action="/export/agent" class="grid">
+      <input list="product-list" name="product_name" value="{{ product_name }}" placeholder="Product name">
+      <datalist id="product-list">{% for p in products %}<option value="{{ p.product_name }}">{% endfor %}</datalist>
+      <input list="market-list" name="target_country" value="{{ target_country }}" placeholder="Target country">
+      <datalist id="market-list">{% for m in markets %}<option value="{{ m.country_name }}">{% endfor %}</datalist>
+      <input name="buyer_type" value="{{ buyer_type }}" placeholder="Buyer type">
+      <select name="tone"><option value="professional" {% if tone=='professional' %}selected{% endif %}>Professional</option><option value="warm" {% if tone=='warm' %}selected{% endif %}>Warm</option><option value="direct" {% if tone=='direct' %}selected{% endif %}>Direct</option></select>
+      <textarea name="goal" placeholder="Goal">{{ goal }}</textarea>
+      <button type="submit" data-i18n="Generate export plan">Generate export plan</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3 data-i18n="Result">Result</h3>
+    {% if result %}
+      <div class="small muted">{{ result.summary }}</div>
+      <div class="kpi" style="margin-top:12px"><div class="muted" data-i18n="Recommended markets">Recommended markets</div><div style="margin-top:6px">{{ result.recommended_markets|join(', ') }}</div></div>
+      <div style="margin-top:12px"><b data-i18n="Subject">Subject</b><div class="sand-card" style="margin-top:6px">{{ result.subject }}</div></div>
+      <div style="margin-top:12px"><b data-i18n="Body">Body</b><div class="sand-card" style="margin-top:6px">{{ result.body|safe }}</div></div>
+      <div style="margin-top:12px"><b data-i18n="Next actions">Next actions</b><ul>{% for item in result.next_actions %}<li>{{ item }}</li>{% endfor %}</ul></div>
+      <div class="small muted"><b data-i18n="Offer notes">Offer notes</b>: {{ result.offer_notes }}</div>
+    {% else %}
+      <div class="empty-state" data-i18n="Choose a product and market to generate a focused export offer draft.">Choose a product and market to generate a focused export offer draft.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

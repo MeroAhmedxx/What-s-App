@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+.metric-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px}
+.metric-chip{padding:14px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07)}
+.selector-box{padding:12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.selector-box select{min-height:280px}
+</style>
+<div class="grid-hero" style="margin-bottom:18px">
+  <div class="hero-brand">
+    <span class="brand-chip">Outreach Hub</span>
+    <h1>Smart campaigns for leads and export follow-up</h1>
+    <p class="muted">Build a clean target batch, choose the correct sending profile, launch the campaign, and keep reply / bounce / unsubscribe handling in the same workspace.</p>
+  </div>
+  <div class="sand-card">
+    <div class="tahhan-kicker">What is better now</div>
+    <div class="small muted">Campaign V2 now works with suppression-aware sending, manual reply sync, unsubscribe handling, and cleaner send logs so the module is easier to sell and safer to use.</div>
+  </div>
+</div>
+
+<div class="metric-strip">
+  <div class="metric-chip"><div class="muted small">Campaigns</div><div class="num">{{ campaigns|length }}</div></div>
+  <div class="metric-chip"><div class="muted small">Profiles</div><div class="num">{{ profiles|length }}</div></div>
+  <div class="metric-chip"><div class="muted small">Templates</div><div class="num">{{ templates_rows|length }}</div></div>
+  <div class="metric-chip"><div class="muted small">Suppressed emails</div><div class="num">{{ suppression_count }}</div></div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="topbar" style="margin-bottom:10px">
+      <div>
+        <h2 style="margin:0">Create campaign</h2>
+        <div class="muted small">Best for one-off offers, catalog sends and controlled batches.</div>
+      </div>
+      <a class="btn btn-secondary fit" href="/campaign-v2/sequences">Open sequences</a>
+    </div>
+    <form method="post" action="/campaign-v2/campaigns/create" class="grid">
+      <input name="campaign_name" placeholder="Campaign name" required>
+      <div class="grid grid-2">
+        <select name="profile_id" required>
+          <option value="">Select sending profile</option>
+          {% for p in profiles %}<option value="{{ p.id }}">{{ p.profile_name }} — {{ p.from_email or p.provider }}</option>{% endfor %}
+        </select>
+        <select name="template_id" required>
+          <option value="">Select template</option>
+          {% for t in templates_rows %}<option value="{{ t.id }}">{{ t.template_name }}</option>{% endfor %}
+        </select>
+      </div>
+      <textarea name="notes" placeholder="Campaign objective, segment notes, market context"></textarea>
+      <div class="selector-box">
+        <div class="topbar" style="margin-bottom:8px"><b>Select target leads</b><span class="muted small">Only leads with email are shown.</span></div>
+        <select name="lead_ids" multiple size="12" style="width:100%">
+          {% for lead in leads %}
+          <option value="{{ lead.id }}">#{{ lead.id }} — {{ lead.company }} — {{ lead.contact_person or '-' }} — {{ lead.email }} — {{ lead.country or '-' }} — {{ lead.stage or '-' }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="row">
+        <button type="submit">Create campaign</button>
+        <a class="btn btn-secondary fit" href="/campaign-v2/replies">Replies & suppression</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Recommended use</h2>
+    <div class="grid" style="gap:10px">
+      <div class="selector-box"><b>Step 1 — profile</b><div class="muted small">Keep each employee mailbox separated with its own sending profile and signature.</div></div>
+      <div class="selector-box"><b>Step 2 — target list</b><div class="muted small">Send only to clean leads with owner, stage, market and good email quality.</div></div>
+      <div class="selector-box"><b>Step 3 — monitor</b><div class="muted small">Use send logs plus replies / suppression to avoid repeating outreach to bounced or unsubscribed contacts.</div></div>
+      <div class="selector-box"><b>Need automation?</b><div class="muted small">Use Sequences for step-by-step auto email follow-up with stop-on-reply and future-ready reply sync groundwork.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="topbar" style="margin-bottom:10px">
+    <div>
+      <h2 style="margin:0">My campaigns</h2>
+      <div class="muted small">One place to open any batch and take manual action when needed.</div>
+    </div>
+    <a class="btn btn-secondary fit" href="/campaign-v2/logs">Open logs</a>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <tr><th>ID</th><th>Name</th><th>Status</th><th>Total</th><th>Sent</th><th>Failed</th><th>Opens</th><th>Clicks</th><th>Replies</th></tr>
+      {% for c in campaigns %}
+      <tr>
+        <td>{{ c.id }}</td>
+        <td><a href="/campaign-v2/campaign/{{ c.id }}">{{ c.campaign_name }}</a></td>
+        <td>{{ c.status }}</td>
+        <td>{{ c.total_recipients }}</td>
+        <td>{{ c.sent_count }}</td>
+        <td>{{ c.failed_count }}</td>
+        <td>{{ c.open_count }}</td>
+        <td>{{ c.click_count }}</td>
+        <td>{{ c.reply_count }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9" class="muted">No campaigns yet.</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

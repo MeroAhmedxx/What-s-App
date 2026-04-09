@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="grid-hero" style="margin-bottom:18px">
+  <div class="hero-brand">
+    <span class="brand-chip" data-i18n="Export Engine">Export Engine</span>
+    <h1 data-i18n="Turn product knowledge into export actions">Turn product knowledge into export actions</h1>
+    <p class="muted" data-i18n="Use product-market fit, shipment follow-up, and AI offer drafting to make the export team faster and more repeatable.">Use product-market fit, shipment follow-up, and AI offer drafting to make the export team faster and more repeatable.</p>
+    <div class="row" style="margin-top:14px"><a class="btn" href="/export/agent" data-i18n="Open AI export agent">Open AI export agent</a><a class="btn btn-secondary" href="/export/products" data-i18n="Open product catalog">Open product catalog</a><a class="btn btn-secondary" href="/export/markets" data-i18n="Open market notes">Open market notes</a></div>
+  </div>
+  <div class="sand-card">
+    <div class="grid grid-3" style="margin-top:8px">
+      <div class="kpi"><div class="muted" data-i18n="Shipments">Shipments</div><div class="num">{{ shipment_count }}</div></div>
+      <div class="kpi"><div class="muted" data-i18n="Open follow-ups">Open follow-ups</div><div class="num">{{ active_followups }}</div></div>
+      <div class="kpi"><div class="muted" data-i18n="Documents">Documents</div><div class="num">{{ docs_count }}</div></div>
+    </div>
+  </div>
+</div>
+<div class="grid grid-2">
+  <div class="card">
+    <div class="topbar"><h3 style="margin:0" data-i18n="Product catalog">Product catalog</h3><a class="btn btn-secondary" href="/export/products" data-i18n="Manage products">Manage products</a></div>
+    <div class="table-wrap"><table class="table"><tr><th data-i18n="Product">Product</th><th data-i18n="Category">Category</th><th data-i18n="Target markets">Target markets</th></tr>
+      {% for row in products %}<tr><td>{{ row.product_name }}</td><td>{{ row.category or '-' }}</td><td>{{ row.target_markets or '-' }}</td></tr>{% else %}<tr><td colspan="3" class="muted">No products yet.</td></tr>{% endfor %}
+    </table></div>
+  </div>
+  <div class="card">
+    <div class="topbar"><h3 style="margin:0" data-i18n="Market notes">Market notes</h3><a class="btn btn-secondary" href="/export/markets" data-i18n="Manage markets">Manage markets</a></div>
+    <div class="table-wrap"><table class="table"><tr><th data-i18n="Country">Country</th><th data-i18n="Demand">Demand</th><th data-i18n="Preferred products">Preferred products</th></tr>
+      {% for row in markets %}<tr><td>{{ row.country_name }}</td><td>{{ row.demand_level or '-' }}</td><td>{{ row.preferred_products or '-' }}</td></tr>{% else %}<tr><td colspan="3" class="muted">No markets yet.</td></tr>{% endfor %}
+    </table></div>
+  </div>
+</div>
+{% endblock %}

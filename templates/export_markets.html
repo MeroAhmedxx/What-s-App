@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><div><h1 data-i18n="Export Markets">Export Markets</h1><div class="muted small" data-i18n="Capture target countries, demand levels, and preferred products for faster market selection.">Capture target countries, demand levels, and preferred products for faster market selection.</div></div></div>
+<div class="grid grid-2">
+  <div class="card">
+    <h3 data-i18n="Add market">Add market</h3>
+    <form method="post" action="/export/markets/add" class="grid">
+      <input name="country_name" placeholder="Country" required>
+      <input name="region_name" placeholder="Region">
+      <input name="demand_level" placeholder="Demand level">
+      <input name="price_position" placeholder="Price position">
+      <input name="preferred_products" placeholder="Preferred products">
+      <textarea name="buyer_types" placeholder="Buyer types"></textarea>
+      <textarea name="entry_points" placeholder="Entry points"></textarea>
+      <textarea name="market_notes" placeholder="Market notes"></textarea>
+      <button type="submit" data-i18n="Save market">Save market</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3 data-i18n="Current markets">Current markets</h3>
+    <div class="table-wrap"><table class="table"><tr><th data-i18n="Country">Country</th><th data-i18n="Region">Region</th><th data-i18n="Demand">Demand</th></tr>
+      {% for row in rows %}<tr><td>{{ row.country_name }}</td><td>{{ row.region_name or '-' }}</td><td>{{ row.demand_level or '-' }}</td></tr>{% else %}<tr><td colspan="3" class="muted">No markets yet.</td></tr>{% endfor %}
+    </table></div>
+  </div>
+</div>
+{% endblock %}

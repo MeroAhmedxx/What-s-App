@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Tasks</h1></div>
+{% set error = request.query_params.get('error') %}
+{% set success = request.query_params.get('success') %}
+{% if error %}<div class="card alert warn">{% if error == 'task_not_found' %}Task not found.{% else %}Please review the task data.{% endif %}</div>{% endif %}
+{% if success %}<div class="card alert ok">Saved successfully.</div>{% endif %}
+<div class="grid grid-3">
+  <div class="kpi"><div class="muted">My Open Tasks</div><div class="num">{{ my_open }}</div></div>
+  <div class="kpi"><div class="muted">Overdue</div><div class="num">{{ overdue }}</div></div>
+  <div class="kpi"><div class="muted">Done in 24h</div><div class="num">{{ done_today }}</div></div>
+</div>
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <h3>Add Task</h3>
+    <form method="post" action="/tasks/add" class="grid">
+      <input name="title" placeholder="Task title" required>
+      <textarea name="description" placeholder="Description / operation details"></textarea>
+      <div class="grid grid-3">
+        <select name="assigned_to">
+          <option value="">Unassigned</option>
+          <option value="__all__">Everyone</option>
+          {% for u in users %}<option value="{{ u.username }}">{{ u.display_name or u.username }}</option>{% endfor %}
+        </select>
+        <select name="priority">
+          <option>Low</option><option selected>Medium</option><option>High</option><option>Urgent</option>
+        </select>
+        <input type="date" name="due_date">
+      </div>
+      <button type="submit">Create Task</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Filters</h3>
+    <form method="get" action="/tasks" class="grid grid-2">
+      <input name="q" placeholder="Search tasks" value="{{ q }}">
+      <select name="status">
+        <option value="">All Statuses</option>
+        {% for s in ['Open','In Progress','Waiting','Done'] %}<option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+      </select>
+      <select name="assigned_to">
+        <option value="">All Users</option>
+        <option value="__all__" {% if assigned_filter == "__all__" %}selected{% endif %}>Everyone</option>
+        {% for u in users %}<option value="{{ u.username }}" {% if assigned_filter == u.username %}selected{% endif %}>{{ u.display_name or u.username }}</option>{% endfor %}
+      </select>
+      <div class="row"><button type="submit" class="fit">Apply</button><a class="btn btn-secondary fit" href="/tasks">Reset</a></div>
+    </form>
+  </div>
+</div>
+<div class="card">
+  <table class="table">
+    <tr><th>ID</th><th>Task</th><th>Assigned</th><th>Priority</th><th>Status</th><th>Due</th><th>Actions</th></tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.id }}</td>
+      <td><strong><a href="/task/{{ r.id }}">{{ r.title }}</a></strong><div class="muted small pre">{{ r.description }}</div></td>
+      <td>{{ 'Everyone' if r.assigned_to == '__all__' else (r.assigned_to or '-') }}</td>
+      <td><span class="badge priority-{{ (r.priority or 'Medium').lower().replace(' ','-') }}">{{ r.priority }}</span></td>
+      <td><span class="badge">{{ r.status }}</span></td>
+      <td>{% if r.due_at and r.due_at > 0 %}<span class="date-epoch">{{ r.due_at|int }}</span>{% else %}-{% endif %}</td>
+      <td>
+        <form method="post" action="/tasks/{{ r.id }}/status" style="display:inline-flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap">
+          <select name="status" style="width:145px">
+            {% for s in ['Open','In Progress','Waiting','Done'] %}<option value="{{ s }}" {% if r.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+          </select>
+          <button type="submit">Update</button>
+          <a class="btn btn-secondary" href="/task/{{ r.id }}">Open</a>
+        </form>
+        <form method="post" action="/tasks/{{ r.id }}/delete" onsubmit="return confirm('Delete this task?')">
+          <button type="submit" class="btn-danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+<script>
+document.querySelectorAll('.date-epoch').forEach(td => {
+  const raw = td.textContent.trim();
+  if(/^[0-9]+$/.test(raw) && Number(raw) > 0){
+    const d = new Date(Number(raw) * 1000);
+    td.textContent = d.toLocaleDateString();
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar">
+  <h1>Database Settings</h1>
+  <div class="actions"><span class="badge">Active driver: {{ settings.db_driver|default('sqlite') }}</span></div>
+</div>
+{% if message %}<div class="card" style="border-color:#2ec27e;color:#9ee6bf">{{ message }}</div>{% endif %}
+{% if error %}<div class="card" style="border-color:#b91c1c;color:#ffb4b4">{{ error }}</div>{% endif %}
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Connection</h3>
+    <form method="post" action="/settings/database" class="grid grid-2">
+      <div>
+        <label>Driver</label>
+        <select name="db_driver">
+          <option value="sqlite" {% if settings.db_driver=='sqlite' %}selected{% endif %}>SQLite (local)</option>
+          <option value="mysql" {% if settings.db_driver=='mysql' %}selected{% endif %}>MySQL Server</option>
+        </select>
+      </div>
+      <div>
+        <label>Database server</label>
+        <input name="db_server" value="{{ settings.db_server|default('') }}" placeholder="127.0.0.1:3306 or db.example.com:3306">
+      </div>
+      <div>
+        <label>Database name</label>
+        <input name="db_name" value="{{ settings.db_name|default('') }}" placeholder="altahhan_crm">
+      </div>
+      <div>
+        <label>User</label>
+        <input name="db_user" value="{{ settings.db_user|default('') }}" placeholder="db username">
+      </div>
+      <div class="grid" style="grid-column:1 / -1">
+        <label>Password</label>
+        <input type="password" name="db_password" value="{{ settings.db_password|default('') }}" placeholder="db password">
+      </div>
+      <div style="grid-column:1 / -1">
+        <button type="submit">Save & test connection</button>
+      </div>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Current status</h3>
+    <p class="muted">This page lets you switch the application between local SQLite and a hosted MySQL server. The app tests the connection before saving.</p>
+    <table class="table">
+      <tr><th>Active DB URL</th><td class="small">{{ active_db_url }}</td></tr>
+      <tr><th>Server</th><td>{{ settings.db_server or 'Local SQLite file' }}</td></tr>
+      <tr><th>Database</th><td>{{ settings.db_name or 'altahhan_crm.db' }}</td></tr>
+      <tr><th>User</th><td>{{ settings.db_user or '-' }}</td></tr>
+    </table>
+    <p class="muted small">Tip: for office testing keep SQLite. For hosted deployment use MySQL.</p>
+  </div>
+</div>
+{% endblock %}

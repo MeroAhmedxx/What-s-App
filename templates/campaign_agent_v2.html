@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class='topbar'>
+  <div>
+    <h1>AI Outreach Agent</h1>
+    <div class='muted small'>Generate export-ready English or Arabic outreach drafts from your lead context. If OPENAI_API_KEY is configured, the agent will generate stronger copy automatically.</div>
+  </div>
+</div>
+<div class='grid grid-2'>
+  <div class='card'>
+    <h3>Generate message</h3>
+    <form method='get' action='/campaign-v2/agent' class='grid'>
+      <input name='company' placeholder='Company' value='{{ company or "" }}'>
+      <input name='contact_name' placeholder='Contact name' value='{{ contact_name or "" }}'>
+      <input name='country' placeholder='Country' value='{{ country or "" }}'>
+      <textarea name='goal' placeholder='Goal'>{{ goal or '' }}</textarea>
+      <button type='submit'>Generate</button>
+    </form>
+  </div>
+  <div class='card'>
+    <h3>How to use it</h3>
+    <div class='muted small'>Use this before creating a campaign or sequence. Generate the draft, polish it, then copy it into your template library or campaign flow. The best results come from adding company, contact, country, and a clear goal.</div>
+    <div style='margin-top:14px' class='small'>Examples: introduce Egyptian dates, follow up after catalog click, reactivate inactive buyer, ask for import requirements.</div>
+  </div>
+</div>
+{% if result %}
+<div class='grid grid-2' style='margin-top:18px'>
+  <div class='card'>
+    <h3>Suggested subject</h3>
+    <textarea rows='4'>{{ result.subject }}</textarea>
+  </div>
+  <div class='card'>
+    <h3>Suggested body</h3>
+    <textarea rows='16'>{{ result.body }}</textarea>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

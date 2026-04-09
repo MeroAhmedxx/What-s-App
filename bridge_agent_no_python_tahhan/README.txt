@@ -1,0 +1,1 @@
+Al Tahhan Outlook Bridge Agent\n\n1) Put the employee device token in agent_config.json\n2) Open Outlook Desktop with the employee email\n3) Run run_bridge.bat\n

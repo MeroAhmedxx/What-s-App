@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><div><h1>Follow-ups</h1><div class="muted small">Central reminder board for shipments, tasks, and the rest of export operations.</div></div><div class="row"><a class="btn btn-secondary" href="/shipments/dashboard">Shipments Dashboard</a></div></div>
+<div class="card">
+  <form method="get" action="/followups" class="grid grid-3">
+    <select name="status"><option value="">All statuses</option>{% for s in ['Open','Waiting','Done','Cancelled'] %}<option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select>
+    <select name="entity_type"><option value="">All types</option><option value="shipment" {% if entity_filter == 'shipment' %}selected{% endif %}>Shipment</option><option value="task" {% if entity_filter == 'task' %}selected{% endif %}>Task</option></select>
+    <div class="row"><button type="submit" class="fit">Apply</button><a class="btn btn-secondary fit" href="/followups">Reset</a></div>
+  </form>
+</div>
+<div class="card" style="margin-top:18px">
+  <table class="table">
+    <tr><th>Type</th><th>Title</th><th>Assigned</th><th>Due</th><th>Status</th><th>Priority</th><th>Action</th></tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.entity_type }}</td>
+      <td>{{ r.title }}<div class="muted small pre">{{ r.notes }}</div></td>
+      <td>{{ r.assigned_to or '-' }}</td>
+      <td>{% if r.followup_at and r.followup_at > 0 %}{{ r.followup_at|int|datetimeformat }}{% else %}-{% endif %}</td>
+      <td><span class="badge">{{ r.status }}</span></td>
+      <td><span class="badge priority-{{ (r.priority or 'Medium').lower() }}">{{ r.priority }}</span></td>
+      <td><form method="post" action="/followups/{{ r.id }}/status" class="row"><select name="status"><option value="Open" {% if r.status=='Open' %}selected{% endif %}>Open</option><option value="Waiting" {% if r.status=='Waiting' %}selected{% endif %}>Waiting</option><option value="Done" {% if r.status=='Done' %}selected{% endif %}>Done</option><option value="Cancelled" {% if r.status=='Cancelled' %}selected{% endif %}>Cancelled</option></select><button type="submit">Save</button>{% if r.entity_type == 'shipment' %}<a class="btn btn-secondary" href="/shipment/{{ r.entity_id }}">Open</a>{% elif r.entity_type == 'task' %}<a class="btn btn-secondary" href="/task/{{ r.entity_id }}">Open</a>{% endif %}</form></td>
+    </tr>
+    {% else %}<tr><td colspan="7" class="muted">No follow-ups found.</td></tr>{% endfor %}
+  </table>
+</div>
+{% endblock %}

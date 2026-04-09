@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class='topbar'><div><h1 data-i18n="Email Sending Profiles">Email Sending Profiles</h1><div class='muted small' data-i18n="Connect Microsoft 365, keep SMTP fallback, and test live sending directly from the website.">Connect Microsoft 365, keep SMTP fallback, and test live sending directly from the website.</div></div><div class="row"><a class="btn btn-secondary" href="/campaign-v2/oauth/microsoft/start" data-i18n="Connect Microsoft 365">Connect Microsoft 365</a><a class="btn btn-secondary" href="/campaign-v2/inbox-sync" data-i18n="Open inbox sync">Open inbox sync</a></div></div>
+<div class='grid grid-2'>
+  <div class='card'>
+    <h3 data-i18n="Connected accounts">Connected accounts</h3>
+    <div class='muted small' style='margin-bottom:10px' data-i18n="Use OAuth for Microsoft 365 so the system can send real email and later sync replies.">Use OAuth for Microsoft 365 so the system can send real email and later sync replies.</div>
+    <form method='post' action='/campaign-v2/oauth/mock-add' class='grid'>
+      <select name='provider'><option value='microsoft'>Microsoft mailbox</option><option value='google'>Google mailbox</option></select>
+      <input name='account_email' placeholder='sender@company.com' required>
+      <input name='display_name' placeholder='Display name'>
+      <button type='submit' data-i18n="Save placeholder">Save placeholder</button>
+    </form>
+    <div class="table-wrap" style="margin-top:14px">
+      <table class="table">
+        <tr><th data-i18n="Provider">Provider</th><th data-i18n="Account">Account</th><th data-i18n="Display">Display</th></tr>
+        {% for a in oauth_accounts %}
+        <tr><td>{{ a.provider }}</td><td>{{ a.account_email }}</td><td>{{ a.display_name or '-' }}</td></tr>
+        {% else %}<tr><td colspan="3" class="muted" data-i18n="No connected accounts yet.">No connected accounts yet.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class='card'>
+    <h3 data-i18n="Create sending profile">Create sending profile</h3>
+    <form method='post' action='/campaign-v2/profiles/add' class='grid'>
+      <input name='profile_name' placeholder='Profile name' required>
+      <select name='provider'>
+        <option value='smtp'>SMTP / server mail</option>
+        <option value='outlook_desktop'>Outlook desktop on PC</option>
+        <option value='microsoft_graph'>Microsoft Graph / Microsoft 365</option>
+      </select>
+      <select name='oauth_account_id'>
+        <option value='0'>Linked account (optional)</option>
+        {% for a in oauth_accounts %}<option value='{{ a.id }}'>{{ a.provider }} — {{ a.account_email }}</option>{% endfor %}
+      </select>
+      <input name='from_name' placeholder='From name'>
+      <input name='from_email' placeholder='From email'>
+      <input name='reply_to' placeholder='Reply-To'>
+      <textarea name='signature_html' placeholder='Signature HTML'></textarea>
+      <div class='grid grid-2'>
+        <input name='smtp_host' placeholder='SMTP host e.g. smtp.office365.com'>
+        <input type='number' name='smtp_port' placeholder='SMTP port' value='587'>
+        <input name='smtp_username' placeholder='SMTP username'>
+        <input name='smtp_password' type='password' placeholder='SMTP password or app password'>
+      </div>
+      <label><input type='checkbox' name='smtp_use_tls' value='1' checked> <span data-i18n="Use TLS for SMTP">Use TLS for SMTP</span></label>
+      <textarea name='graph_access_token' placeholder='Microsoft Graph access token (optional if linked account is connected)'></textarea>
+      <div class='grid grid-4'>
+        <input type='number' name='daily_limit' placeholder='Daily' value='150'>
+        <input type='number' name='hourly_limit' placeholder='Hourly' value='40'>
+        <input type='number' name='min_delay_seconds' placeholder='Min delay' value='0'>
+        <input type='number' name='max_delay_seconds' placeholder='Max delay' value='0'>
+      </div>
+      <label><input type='checkbox' name='is_default' value='1'> <span data-i18n="Default profile">Default profile</span></label>
+      <button type='submit' data-i18n="Create profile">Create profile</button>
+    </form>
+  </div>
+</div>
+<div class='card' style='margin-top:18px'>
+  <h3 data-i18n="My profiles">My profiles</h3>
+  <table class='table'>
+    <tr><th>ID</th><th data-i18n="Name">Name</th><th data-i18n="Provider">Provider</th><th data-i18n="From">From</th><th data-i18n="Reply-To">Reply-To</th><th data-i18n="Limits">Limits</th><th data-i18n="Default">Default</th><th data-i18n="Live test">Live test</th></tr>
+    {% for p in profiles %}
+    <tr><td>{{ p.id }}</td><td>{{ p.profile_name }}</td><td>{{ p.provider }}</td><td>{{ p.from_email or p.account_email or '-' }}</td><td>{{ p.reply_to or '-' }}</td><td>{{ p.hourly_limit }}/hr · {{ p.daily_limit }}/day</td><td>{% if p.is_default %}✅{% else %}-{% endif %}</td><td><form method='post' action='/campaign-v2/profiles/{{ p.id }}/test-send' class='row'><input name='to_email' placeholder='recipient@email.com' required><button type='submit' data-i18n="Send test">Send test</button></form></td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

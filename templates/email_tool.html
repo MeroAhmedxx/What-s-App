@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+.email-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.email-card{display:block;text-decoration:none;color:inherit;transition:transform .15s ease}
+.email-card .desc{min-height:48px}
+.email-card:hover{transform:translateY(-3px)}
+.tool-pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:18px 0}
+.tool-pillars .mini-box{padding:14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06)}
+.outreach-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;margin:18px 0}
+.outreach-grid .card{margin-bottom:0}
+.roadmap-list{display:grid;gap:10px}
+.roadmap-item{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+@media (max-width: 980px){.outreach-grid{grid-template-columns:1fr}}
+</style>
+<div class="grid-hero">
+  <div class="hero-brand">
+    <div class="tahhan-kicker">{{ branding.company_name }} · <span data-i18n="Outreach Hub">Outreach Hub</span></div>
+    <h1 data-i18n="One focused workspace for leads, campaigns and email execution">One focused workspace for leads, campaigns and email execution</h1>
+    <div class="muted" style="max-width:760px" data-i18n="This workspace is separated from daily operations so users do not get lost in a long sidebar. Review leads, build branded templates, control sending profiles, launch campaigns, monitor bridge devices and track recipient engagement from one cleaner outreach area.">This workspace is separated from daily operations so users do not get lost in a long sidebar. Review leads, build branded templates, control sending profiles, launch campaigns, monitor bridge devices and track recipient engagement from one cleaner outreach area.</div>
+    <div class="row" style="margin-top:14px">
+      <span class="brand-chip" data-i18n="Leads & lists">Leads & lists</span>
+      <span class="brand-chip" data-i18n="Campaign control">Campaign control</span>
+      <span class="brand-chip" data-i18n="Profiles by employee">Profiles by employee</span>
+      <span class="brand-chip" data-i18n="Tracking & signals">Tracking & signals</span>
+    </div>
+  </div>
+  <div class="sand-card">
+    <h3 style="margin-top:0" data-i18n="Suggested flow">Suggested flow</h3>
+    <div class="small muted" data-i18n="1) review target leads and segments 2) choose the correct sender profile 3) prepare or select a branded template 4) launch a campaign and monitor logs 5) follow opens, clicks and manual replies from the export workflow">1) review target leads and segments 2) choose the correct sender profile 3) prepare or select a branded template 4) launch a campaign and monitor logs 5) follow opens, clicks and manual replies from the export workflow</div>
+    <div class="soft-line" style="margin:14px 0"></div>
+    <div class="small"><b data-i18n="Recommended mode:">Recommended mode:</b> <span data-i18n="Outlook Bridge on the employee PC with Outlook Desktop open, while keeping the workspace ready for future provider integrations.">Outlook Bridge on the employee PC with Outlook Desktop open, while keeping the workspace ready for future provider integrations.</span></div>
+  </div>
+</div>
+
+<div class="tool-pillars">
+  <div class="mini-box"><b data-i18n="Leads">Leads</b><div class="muted small" data-i18n="Prepare clean target lists before any outreach.">Prepare clean target lists before any outreach.</div></div>
+  <div class="mini-box"><b data-i18n="Templates">Templates</b><div class="muted small" data-i18n="Keep offers and follow-ups on company branding.">Keep offers and follow-ups on company branding.</div></div>
+  <div class="mini-box"><b data-i18n="Campaigns">Campaigns</b><div class="muted small" data-i18n="Send, pause and review outreach batches with logs.">Send, pause and review outreach batches with logs.</div></div>
+  <div class="mini-box"><b data-i18n="Tracking">Tracking</b><div class="muted small" data-i18n="Review opens, clicks and campaign activity signals.">Review opens, clicks and campaign activity signals.</div></div>
+</div>
+
+<div class="outreach-grid">
+  <div class="card">
+    <div class="tahhan-kicker" data-i18n="Lead-to-email flow">Lead-to-email flow</div>
+    <div class="roadmap-list" style="margin-top:12px">
+      <div class="roadmap-item"><b data-i18n="1. Prepare lead lists">1. Prepare lead lists</b><div class="muted small" data-i18n="Start from clean leads with owner, stage, country and good email quality.">Start from clean leads with owner, stage, country and good email quality.</div></div>
+      <div class="roadmap-item"><b data-i18n="2. Match the right sender profile">2. Match the right sender profile</b><div class="muted small" data-i18n="Pick the correct employee mailbox or Outlook bridge device before sending.">Pick the correct employee mailbox or Outlook bridge device before sending.</div></div>
+      <div class="roadmap-item"><b data-i18n="3. Launch and monitor">3. Launch and monitor</b><div class="muted small" data-i18n="Watch logs, signals and follow-up reactions without leaving the export workflow.">Watch logs, signals and follow-up reactions without leaving the export workflow.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tahhan-kicker" data-i18n="Auto-email roadmap">Auto-email roadmap</div>
+    <div class="roadmap-list" style="margin-top:12px">
+      <div class="roadmap-item"><b data-i18n="Available now">Available now</b><div class="muted small" data-i18n="Profiles, templates, campaigns, sequences, tracking, reply sync and bridge-based delivery.">Profiles, templates, campaigns, sequences, tracking, reply sync and bridge-based delivery.</div></div>
+      <div class="roadmap-item"><b data-i18n="Recommended next">Recommended next</b><div class="muted small" data-i18n="Now included: sequences, stop-on-reply, unsubscribe suppression, bounce handling and manual reply sync groundwork.">Now included: sequences, stop-on-reply, unsubscribe suppression, bounce handling and manual reply sync groundwork.</div></div>
+      <div class="roadmap-item"><b data-i18n="Commercial value">Commercial value</b><div class="muted small" data-i18n="This turns the module from a sending screen into a reusable outreach engine that is easier to sell to future clients.">This turns the module from a sending screen into a reusable outreach engine that is easier to sell to future clients.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="email-grid">
+  {% for c in cards %}
+  <a class="card email-card" href="{{ c.href }}">
+    <h3 style="margin-top:0">{{ c.title }}</h3>
+    <div class="muted desc">{{ c.desc }}</div>
+    <div style="margin-top:14px"><span class="btn fit" data-i18n="Open">Open</span></div>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}

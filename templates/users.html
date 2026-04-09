@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><div><h1 style="margin:0">Users</h1><div class="muted small">Create, edit, disable and reset team accounts.</div></div></div>
+{% set error = request.query_params.get('error') %}
+{% set success = request.query_params.get('success') %}
+{% if error %}
+<div class="card" style="border-color:#ffb86c;color:#ffb86c">
+  {% if error == 'self_toggle' %}You cannot disable the current logged in admin user.
+  {% elif error == 'username_exists' %}This username already exists.
+  {% elif error == 'user_not_found' %}User not found.
+  {% elif error == 'password_short' %}Password must be at least 4 characters.
+  {% elif error == 'self_delete' %}You cannot delete the current logged in admin user.
+  {% else %}Please review the data and try again.{% endif %}
+</div>
+{% endif %}
+{% if success %}
+<div class="card" style="border-color:#2ec27e;color:#2ec27e">
+  {% if success == 'user_added' %}User added successfully.
+  {% elif success == 'user_enabled' %}User enabled successfully.
+  {% elif success == 'user_disabled' %}User disabled successfully.
+  {% elif success == 'password_reset' %}Password reset successfully.
+  {% elif success == 'user_updated' %}User updated successfully.
+  {% elif success == 'user_deleted' %}User deleted successfully.
+  {% else %}Saved successfully.{% endif %}
+</div>
+{% endif %}
+<div class="card">
+  <h3>Add User</h3>
+  <form method="post" action="/users/add" class="grid grid-4 user-add-grid" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr auto">
+    <input name="username" placeholder="Username" required>
+    <input name="display_name" placeholder="Display name">
+    <input name="job_title" placeholder="Job title">
+    <input type="password" name="password" placeholder="Password" required>
+    <select name="role"><option value="staff">staff</option><option value="manager">manager</option><option value="viewer">viewer</option><option value="admin">admin</option></select>
+    <button type="submit">Add User</button>
+  </form>
+</div>
+<div class="card">
+  <div class="table-wrap">
+  <table class="table">
+    <tr><th>ID</th><th>Username</th><th>Profile</th><th>Role</th><th>Active</th><th>Edit / Reset / Remove</th></tr>
+    {% for u in users %}
+    <tr>
+      <td>{{ u.id }}</td>
+      <td><div style="display:flex;align-items:center;gap:10px"><img src="{{ '/uploads/avatars/' ~ (u.avatar_path or '') if u.avatar_path else '/static/assets/logo.png' }}" class="avatar-sm"><div><div><b>{{ u.username }}</b></div><div class="muted small">{{ u.job_title or '-' }}</div></div></div></td>
+      <td>
+        <form method="post" action="/users/{{ u.id }}/edit" class="grid" style="grid-template-columns:1.3fr 1.2fr 1fr 1fr auto;gap:8px;align-items:center;">
+          <input name="display_name" value="{{ u.display_name or '' }}" placeholder="Display name">
+          <input name="job_title" value="{{ u.job_title or '' }}" placeholder="Job title">
+          <select name="role">
+            <option value="staff" {% if u.role in ['staff','user'] %}selected{% endif %}>staff</option>
+            <option value="manager" {% if u.role == 'manager' %}selected{% endif %}>manager</option>
+            <option value="viewer" {% if u.role == 'viewer' %}selected{% endif %}>viewer</option>
+            <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>admin</option>
+          </select>
+          <select name="is_active">
+            <option value="1" {% if u.is_active %}selected{% endif %}>Active</option>
+            <option value="0" {% if not u.is_active %}selected{% endif %}>Disabled</option>
+          </select>
+          <button type="submit">Save</button>
+        </form>
+      </td>
+      <td>{{ u.role }}</td>
+      <td>{{ 'Yes' if u.is_active else 'No' }}</td>
+      <td>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <form method="post" action="/users/{{ u.id }}/password" style="display:inline-flex;gap:6px;align-items:center;">
+            <input type="password" name="password" placeholder="New password" style="width:140px;display:inline-block" required>
+            <button type="submit">Reset</button>
+          </form>
+
+          {% if u.password_change_requested %}
+          <form method="post" action="/users/{{ u.id }}/approve-password-request" style="display:inline-block">
+            <button type="submit">Approve request</button>
+          </form>
+          <form method="post" action="/users/{{ u.id }}/reject-password-request" style="display:inline-block">
+            <button type="submit" class="btn-secondary">Reject</button>
+          </form>
+          {% endif %}
+          {% if username != u.username %}
+          <form method="post" action="/users/{{ u.id }}/delete" style="display:inline-block" onsubmit="return confirm('Delete user {{ u.username }}?')">
+            <button type="submit">Delete</button>
+          </form>
+          {% else %}
+          <span class="muted small">Current admin</span>
+          {% endif %}
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+</div>
+{% endblock %}

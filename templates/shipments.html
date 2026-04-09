@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.mini-kpi{padding:16px;border:1px solid rgba(202,160,61,.14);border-radius:16px;background:linear-gradient(180deg,var(--panel),var(--panel-2))}.wizard-note{padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);color:var(--muted)}.shipment-table td{vertical-align:top}.shipment-table .meta{font-size:12px;color:var(--muted)}
+@media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr}.shipment-table{display:block;overflow:auto}}
+</style>
+<div class="topbar"><div><h1>Shipments</h1><div class="muted small">Simple shipment-first workflow: create shipment, add customer deals, then generate all documents.</div></div><div class="row"><a class="btn btn-secondary" href="/shipments/dashboard">Operations Dashboard</a><a class="btn" href="/export/deals">Customer Deals</a></div></div>
+
+<div class="kpi-grid">
+  <div class="mini-kpi"><div class="muted small">Shipment master</div><h3 style="margin:8px 0 4px">1 shipment</h3><div class="small muted">Represents booking, vessel, ports and general movement.</div></div>
+  <div class="mini-kpi"><div class="muted small">Customer deals</div><h3 style="margin:8px 0 4px">Many deals</h3><div class="small muted">Each client inside the shipment gets its own invoice and payment docs.</div></div>
+  <div class="mini-kpi"><div class="muted small">Document pack</div><h3 style="margin:8px 0 4px">1 click</h3><div class="small muted">Invoice + packing + CAD or bill generated together.</div></div>
+  <div class="mini-kpi"><div class="muted small">Best rule</div><h3 style="margin:8px 0 4px">Type once</h3><div class="small muted">Enter shipment data once, avoid repeating Excel edits.</div></div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <h3>Create Shipment Master</h3>
+    <div class="wizard-note">Keep this step short. Only shipment-level data belongs here. Client invoice data will be added later inside the shipment.</div>
+    <form method="post" action="/shipments/add" class="grid" style="margin-top:14px">
+      <div class="grid grid-3">
+        <input name="shipment_no" placeholder="Shipment / Booking No." required>
+        <select name="trade_type"><option>Export</option><option>Import</option></select>
+        <select name="current_status">{% for s in status_steps %}<option value="{{ s }}">{{ s }}</option>{% endfor %}</select>
+      </div>
+      <div class="grid grid-2">
+        <input name="company" placeholder="Main customer group / reference (optional)">
+        <input name="supplier" placeholder="Supplier / exporter (optional)">
+      </div>
+      <div class="grid grid-3">
+        <input name="product_name" placeholder="Main product for this shipment">
+        <input name="container_count" type="number" min="0" placeholder="Containers">
+        <input name="cartons_count" type="number" min="0" placeholder="Estimated cartons">
+      </div>
+      <div class="grid grid-2">
+        <input name="origin_port" placeholder="Port of loading">
+        <input name="destination_port" placeholder="Port of discharge">
+      </div>
+      <div class="grid grid-3">
+        <input name="vessel_name" placeholder="Vessel / transport reference">
+        <input type="date" name="etd_date">
+        <input type="date" name="eta_date">
+      </div>
+      <input name="quantity" type="hidden" value="0">
+      <input name="quantity_unit" type="hidden" value="MT">
+      <input name="invoice_amount" type="hidden" value="0">
+      <input name="currency" type="hidden" value="USD">
+      <input name="product_category" type="hidden" value="Dates">
+      <input name="item_name" type="hidden" value="">
+      <input name="container_type" type="hidden" value="40ft">
+      <input name="client_id" type="hidden" value="0">
+      <input name="contact_person" type="hidden" value="">
+      <input name="missing_items" type="hidden" value="">
+      <textarea name="notes" placeholder="Shipment notes"></textarea>
+      <div class="row" style="justify-content:flex-end"><button type="submit">Create Shipment</button></div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Find Shipment</h3>
+    <form method="get" action="/shipments" class="grid grid-2">
+      <input name="q" value="{{ q }}" placeholder="Search by shipment no, company, product, vessel">
+      <select name="status"><option value="">All statuses</option>{% for s in status_steps %}<option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select>
+      <select name="trade_type"><option value="">All types</option><option value="Export" {% if trade_type_filter == 'Export' %}selected{% endif %}>Export</option><option value="Import" {% if trade_type_filter == 'Import' %}selected{% endif %}>Import</option></select>
+      <div class="row"><button type="submit" class="fit">Apply</button><a class="btn btn-secondary fit" href="/shipments">Reset</a></div>
+    </form>
+    <div class="wizard-note" style="margin-top:14px">Best daily flow: <b>Create shipment</b> → open shipment → <b>Add customer deal</b> → <b>Generate documents</b>.</div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <table class="table shipment-table">
+    <tr><th>Shipment</th><th>Ports</th><th>Containers</th><th>Status</th><th>Open</th></tr>
+    {% for r in rows %}
+    <tr>
+      <td><strong>{{ r.shipment_no }}</strong><div class="meta">{{ r.product_name or '-' }}</div><div class="meta">{{ r.company or r.supplier or '-' }}</div></td>
+      <td>{{ r.origin_port or '-' }} → {{ r.destination_port or '-' }}<div class="meta">{{ r.vessel_name or '-' }}</div></td>
+      <td>{{ r.container_count or 0 }} × {{ r.container_type or '-' }}<div class="meta">{{ r.cartons_count or 0 }} cartons</div></td>
+      <td><span class="badge">{{ r.current_status }}</span><div class="meta">{{ r.meta.summary }}</div></td>
+      <td><a class="btn" href="/shipment/{{ r.id }}">Open Shipment</a></td>
+    </tr>
+    {% else %}<tr><td colspan="5" class="muted">No shipments yet.</td></tr>{% endfor %}
+  </table>
+</div>
+{% endblock %}

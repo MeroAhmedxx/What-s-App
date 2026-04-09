@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ branding.app_title }} · Tour</title>
+  <link rel="stylesheet" href="/static/style.css?v=tradeflow-v15">
+  <script src="/static/lang/translator.js?v=3"></script>
+  <style>
+    .tour-shell{min-height:100vh;padding:24px;background:radial-gradient(circle at top right,rgba(242,197,108,.12),transparent 24%),linear-gradient(180deg,#25130d,#130b08 45%,#0d0806)}
+    .tour-top,.tour-grid,.tour-sections,.tour-footer{max-width:1180px;margin:0 auto}
+    .tour-top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+    .tour-grid{display:grid;grid-template-columns:1.25fr .95fr;gap:18px}
+    .tour-sections{margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .tour-compare{margin-top:18px;display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .tour-footer{margin-top:18px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#ecd9c0}
+    .tour-hero{padding:28px;border-radius:28px;background:linear-gradient(135deg,rgba(139,30,23,.94),rgba(54,22,14,.98));border:1px solid rgba(242,197,108,.28);position:relative;overflow:hidden}
+    .tour-hero:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 84% 18%,rgba(242,197,108,.16),transparent 22%),linear-gradient(120deg,transparent 0 56%,rgba(255,255,255,.04) 57% 62%,transparent 63% 100%);pointer-events:none}
+    .tour-list{display:grid;gap:10px;margin-top:14px}
+    .tour-item{padding:14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+    .tour-sections .card,.tour-compare .card{margin-bottom:0}
+    .tour-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+    @media (max-width:980px){.tour-grid,.tour-sections,.tour-compare,.tour-kpis{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="tour-shell">
+  <div class="tour-top">
+    <div class="brand-block" style="margin:0">
+      <img src="/static/assets/logo.png" alt="{{ branding.company_name }}" class="brand-logo">
+      <div>
+        <div class="brand-name">{{ branding.product_name }}</div>
+        <div class="muted small">{{ branding.edition_name }} · {{ branding.company_name }}</div>
+      </div>
+    </div>
+    <div class="row" style="gap:10px">
+      <select id="lang-switcher" class="lang-switcher" onchange="setLang(this.value)">
+        <option value="en">EN</option>
+        <option value="ar">AR</option>
+      </select>
+      <a class="btn btn-secondary fit" href="/" data-i18n="Back to intro">Back to intro</a>
+      <a class="btn fit" href="/login" data-i18n="Open login">Open login</a>
+    </div>
+  </div>
+
+  <div class="tour-grid">
+    <section class="tour-hero">
+      <div class="eyebrow" data-i18n="Final presentation build">Final presentation build</div>
+      <h1 style="font-size:40px;line-height:1.06;margin:12px 0 10px" data-i18n="A cleaner, easier and more sellable product experience for Altahhan — with a reusable core for future clients.">A cleaner, easier and more sellable product experience for Altahhan — with a reusable core for future clients.</h1>
+      <p class="muted" data-i18n="Use this page as your talking track before opening the live workspace. It shows what the product includes now, how it is different from the older build and why the new version is easier to adopt.">Use this page as your talking track before opening the live workspace. It shows what the product includes now, how it is different from the older build and why the new version is easier to adopt.</p>
+      <div class="tour-kpis">
+        <div class="kpi"><div class="muted" data-i18n="Workspace">Workspace</div><div class="num" style="font-size:18px" data-i18n="CRM + Outreach + Operations">CRM + Outreach + Operations</div></div>
+        <div class="kpi"><div class="muted" data-i18n="Language">Language</div><div class="num" style="font-size:18px">EN / AR</div></div>
+        <div class="kpi"><div class="muted" data-i18n="Direction">Direction</div><div class="num" style="font-size:18px" data-i18n="Product core">Product core</div></div>
+      </div>
+    </section>
+    <aside class="card">
+      <div class="tahhan-kicker" data-i18n="What is included now">What is included now</div>
+      <div class="tour-list">
+        <div class="tour-item"><b data-i18n="Management dashboard">Management dashboard</b><div class="muted small" data-i18n="Pipeline, leads, shipments, tasks and activity in one overview.">Pipeline, leads, shipments, tasks and activity in one overview.</div></div>
+        <div class="tour-item"><b data-i18n="Outreach workspace">Outreach workspace</b><div class="muted small" data-i18n="Campaigns, profiles, templates, bridge monitor and tracking signals.">Campaigns, profiles, templates, bridge monitor and tracking signals.</div></div>
+        <div class="tour-item"><b data-i18n="Operational execution">Operational execution</b><div class="muted small" data-i18n="Shipments, documents, invoices, packing lists, reminders and internal follow-up.">Shipments, documents, invoices, packing lists, reminders and internal follow-up.</div></div>
+        <div class="tour-item"><b data-i18n="Product layer">Product layer</b><div class="muted small" data-i18n="Intro page, product tour, reusable branding profile and unified search.">Intro page, product tour, reusable branding profile and unified search.</div></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="tour-sections">
+    <div class="card">
+      <div class="tahhan-kicker" data-i18n="Why this version is easier">Why this version is easier</div>
+      <div class="tour-list">
+        <div class="tour-item"><b data-i18n="Separated workspaces">Separated workspaces</b><div class="muted small" data-i18n="Operations and Outreach are clearer, so employees do not feel lost in long menus.">Operations and Outreach are clearer, so employees do not feel lost in long menus.</div></div>
+        <div class="tour-item"><b data-i18n="Unified search">Unified search</b><div class="muted small" data-i18n="Search across leads, clients, shipments, campaigns, tasks and trade references.">Search across leads, clients, shipments, campaigns, tasks and trade references.</div></div>
+        <div class="tour-item"><b data-i18n="Bilingual flow">Bilingual flow</b><div class="muted small" data-i18n="Cleaner translation hooks on key pages make EN / AR switching more reliable.">Cleaner translation hooks on key pages make EN / AR switching more reliable.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="tahhan-kicker" data-i18n="What makes it more sellable">What makes it more sellable</div>
+      <div class="tour-list">
+        <div class="tour-item"><b data-i18n="Product identity">Product identity</b><div class="muted small" data-i18n="TradeFlow CRM is now positioned as a reusable product, not just one internal tool.">TradeFlow CRM is now positioned as a reusable product, not just one internal tool.</div></div>
+        <div class="tour-item"><b data-i18n="Edition model">Edition model</b><div class="muted small" data-i18n="Altahhan Edition today means future branded editions can reuse the same core later.">Altahhan Edition today means future branded editions can reuse the same core later.</div></div>
+        <div class="tour-item"><b data-i18n="Management story">Management story</b><div class="muted small" data-i18n="The intro, tour and dashboard now explain value before users dive into raw screens.">The intro, tour and dashboard now explain value before users dive into raw screens.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="tahhan-kicker" data-i18n="What comes next">What comes next</div>
+      <div class="tour-list">
+        <div class="tour-item"><b data-i18n="Auto-email sequences">Auto-email sequences</b><div class="muted small" data-i18n="Add step-based follow-up flows with stop-on-reply behavior.">Add step-based follow-up flows with stop-on-reply behavior.</div></div>
+        <div class="tour-item"><b data-i18n="Provider sync">Provider sync</b><div class="muted small" data-i18n="Add deeper Microsoft 365 or Gmail sync to make replies and delivery more automatic.">Add deeper Microsoft 365 or Gmail sync to make replies and delivery more automatic.</div></div>
+        <div class="tour-item"><b data-i18n="Company editions">Company editions</b><div class="muted small" data-i18n="Use the same product profile structure later for another company or country.">Use the same product profile structure later for another company or country.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tour-compare">
+    <div class="card">
+      <div class="tahhan-kicker" data-i18n="Difference vs the older build">Difference vs the older build</div>
+      <div class="tour-list">
+        <div class="tour-item"><b data-i18n="Old build">Old build</b><div class="muted small" data-i18n="Strong internal functionality, but still closer to a company-specific operational tool.">Strong internal functionality, but still closer to a company-specific operational tool.</div></div>
+        <div class="tour-item"><b data-i18n="Navigation">Navigation</b><div class="muted small" data-i18n="Menus were functional but less product-oriented for management presentation.">Menus were functional but less product-oriented for management presentation.</div></div>
+        <div class="tour-item"><b data-i18n="Positioning">Positioning</b><div class="muted small" data-i18n="Branding and structure looked more like one deployment than a reusable B2B product.">Branding and structure looked more like one deployment than a reusable B2B product.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="tahhan-kicker" data-i18n="What changed in the final build">What changed in the final build</div>
+      <div class="tour-list">
+        <div class="tour-item"><b data-i18n="Intro + tour">Intro + tour</b><div class="muted small" data-i18n="You now have a proper opening experience before login and a product-tour page for demos.">You now have a proper opening experience before login and a product-tour page for demos.</div></div>
+        <div class="tour-item"><b data-i18n="Outreach Hub">Outreach Hub</b><div class="muted small" data-i18n="The email side is more clearly presented as a focused outreach workspace linked to leads.">The email side is more clearly presented as a focused outreach workspace linked to leads.</div></div>
+        <div class="tour-item"><b data-i18n="Unified search and bilingual polish">Unified search and bilingual polish</b><div class="muted small" data-i18n="Search is faster and key screens use stronger EN / AR translation mapping for a smoother UX.">Search is faster and key screens use stronger EN / AR translation mapping for a smoother UX.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tour-footer small">
+    <div>{{ branding.product_name }} · {{ branding.edition_name }} · {{ product_version }}</div>
+    <div data-i18n="Best demo order: dashboard → leads → outreach hub → shipments → trade library">Best demo order: dashboard → leads → outreach hub → shipments → trade library</div>
+  </div>
+</div>
+</body>
+</html>

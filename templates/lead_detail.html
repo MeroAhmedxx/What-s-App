@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Lead #{{ lead.id }} — {{ lead.company }}</h1><a class="btn btn-secondary" href="/pi/{{ lead.id }}">PI Preview</a></div>
+{% set success = request.query_params.get('success') %}
+{% if success == 'updated' %}<div class="card" style="border-color:#2ec27e;color:#2ec27e">Lead updated successfully.</div>{% endif %}
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Lead Info</h3>
+    <div class="grid grid-4" style="margin-bottom:12px">
+      <div class="kpi"><div class="muted">Stage</div><div class="num" style="font-size:22px">{{ lead.stage }}</div></div>
+      <div class="kpi"><div class="muted">Score</div><div class="num" style="font-size:22px">{{ lead.score or 0 }}</div></div>
+      <div class="kpi"><div class="muted">Owner</div><div class="num" style="font-size:18px">{{ lead.assigned_to or '-' }}</div></div>
+      <div class="kpi"><div class="muted">Value</div><div class="num" style="font-size:18px">{{ lead.estimated_value or 0 }}</div></div>
+    </div>
+    <form method="post" action="/lead/{{ lead.id }}/update" class="grid grid-2">
+      <input name="company" value="{{ lead.company }}" placeholder="Company" required>
+      <input name="contact_person" value="{{ lead.contact_person }}" placeholder="Contact person">
+      <input name="phone" value="{{ lead.phone }}" placeholder="Phone">
+      <input name="email" value="{{ lead.email }}" placeholder="Email">
+      <input name="country" value="{{ lead.country }}" placeholder="Country">
+      <input name="city" value="{{ lead.city }}" placeholder="City">
+      <input name="source" value="{{ lead.source }}" placeholder="Source">
+      <select name="assigned_to"><option value="">Unassigned</option>{% for u in users %}<option value="{{ u.username }}" {% if lead.assigned_to==u.username %}selected{% endif %}>{{ u.display_name or u.username }}</option>{% endfor %}</select>
+      <input name="tags" value="{{ lead.tags }}" placeholder="Tags">
+      <input name="type" value="{{ lead.type }}" placeholder="Type">
+      <input name="status" value="{{ lead.status }}" placeholder="Status">
+      <select name="stage"><option {% if lead.stage=='Lead' %}selected{% endif %}>Lead</option><option {% if lead.stage=='Contacted' %}selected{% endif %}>Contacted</option><option {% if lead.stage=='Negotiation' %}selected{% endif %}>Negotiation</option><option {% if lead.stage=='Quotation' %}selected{% endif %}>Quotation</option><option {% if lead.stage=='Won' %}selected{% endif %}>Won</option><option {% if lead.stage=='Lost' %}selected{% endif %}>Lost</option></select>
+      <input name="estimated_value" type="number" step="0.01" value="{{ lead.estimated_value }}" placeholder="Estimated Value">
+      <textarea name="notes" placeholder="Business notes / request details">{{ lead.notes }}</textarea>
+      <button type="submit">Save Changes</button>
+    </form>
+    {% if user and user.role == 'admin' %}
+    <form method="post" action="/lead/{{ lead.id }}/delete" onsubmit="return confirm('Delete this lead?')" style="margin-top:12px">
+      <button type="submit">Delete Lead</button>
+    </form>
+    {% endif %}
+  </div>
+  <div class="card">
+    <h3>Add Note</h3>
+    <form method="post" action="/leads/{{ lead.id }}/note">
+      <textarea name="body" placeholder="Write a team note" required></textarea>
+      <button type="submit">Save Note</button>
+    </form>
+    <h3 style="margin-top:16px">Upload Attachment</h3>
+    <form method="post" action="/leads/{{ lead.id }}/upload" enctype="multipart/form-data" class="row">
+      <input type="file" name="file" required>
+      <button type="submit">Upload</button>
+    </form>
+    {% if attachments %}
+    <div style="margin-top:14px">
+      {% for a in attachments %}<div class="card"><a href="/uploads/{{ a.filename }}" target="_blank">{{ a.original_name }}</a><div class="small muted">{{ a.created_at|datetimeformat }}</div></div>{% endfor %}
+    </div>
+    {% endif %}
+    <h3>Notes</h3>
+    {% for n in notes %}<div class="card"><div class="small muted">{{ n.author }}</div><div class="pre">{{ n.body }}</div></div>{% endfor %}
+  </div>
+</div>
+<div class="card">
+  <h3>Tracking History</h3>
+  <table class="table"><tr><th>Event</th><th>Details</th></tr>{% for t in tracking %}<tr><td>{{ t.event_type }}</td><td>{{ t.details }}</td></tr>{% endfor %}</table>
+</div>
+{% endblock %}

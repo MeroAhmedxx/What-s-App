@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Tracking</h1></div>
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Tracked Link Builder</h3>
+    <div class="grid">
+      <input id="target" placeholder="Target URL e.g. https://example.com/catalog.pdf">
+      <select id="lead_id"><option value="0">Lead</option>{% for l in leads %}<option value="{{ l.id }}">{{ l.company }}</option>{% endfor %}</select>
+      <select id="campaign_id"><option value="0">Campaign</option>{% for c in campaigns %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select>
+      <input id="email" placeholder="Lead email (optional)">
+      <button type="button" onclick="buildTracked()">Build Link</button>
+      <textarea id="tracked_out" readonly></textarea>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Events</h3>
+    <table class="table"><tr><th>Type</th><th>Email</th><th>Details</th></tr>{% for r in rows %}<tr><td>{{ r.event_type }}</td><td>{{ r.email }}</td><td>{{ r.details }}</td></tr>{% endfor %}</table>
+  </div>
+</div>
+<script>
+function buildTracked(){
+  const target = encodeURIComponent(document.getElementById('target').value);
+  const lead = document.getElementById('lead_id').value;
+  const campaign = document.getElementById('campaign_id').value;
+  const email = encodeURIComponent(document.getElementById('email').value || '');
+  document.getElementById('tracked_out').value = '{{ tracking_base_url }}' + '/track/click?target=' + target + '&lead_id=' + lead + '&campaign_id=' + campaign + '&email=' + email;
+}
+</script>
+{% endblock %}

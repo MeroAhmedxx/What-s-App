@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="grid-hero" style="margin-bottom:18px">
+  <div class="hero-brand">
+    <span class="brand-chip">Reports Center</span>
+    <h1 style="margin-top:10px">Export Analysis</h1>
+    <p class="muted" style="max-width:760px">A cleaner summary to replace common Excel analysis: customer totals, product movement, booking values and percentages.</p>
+    <div class="quick-actions">
+      <a class="btn{% if period=='week' %} btn-secondary{% endif %}" href="/reports?period=week">Week</a>
+      <a class="btn{% if period=='month' %} btn-secondary{% endif %}" href="/reports?period=month">Month</a>
+      <a class="btn{% if period=='quarter' %} btn-secondary{% endif %}" href="/reports?period=quarter">Quarter</a>
+      <a class="btn{% if period=='year' %} btn-secondary{% endif %}" href="/reports?period=year">Year</a>
+      <a class="btn btn-secondary" href="/reports/export?period={{ period }}">Export Excel</a>
+    </div>
+  </div>
+  <div class="sand-card">
+    <div class="tahhan-kicker">Period summary</div>
+    <div class="grid grid-2" style="margin-top:12px">
+      <div class="kpi"><div class="muted">Shipments</div><div class="num">{{ summary.shipments_count or 0 }}</div></div>
+      <div class="kpi"><div class="muted">Containers</div><div class="num">{{ summary.total_containers or 0 }}</div></div>
+      <div class="kpi"><div class="muted">Cartons</div><div class="num">{{ summary.total_cartons or 0 }}</div></div>
+      <div class="kpi"><div class="muted">Invoice Total</div><div class="num">{{ '%.0f'|format(summary.total_invoice_amount or 0) }}</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="topbar" style="margin-bottom:12px"><h3 style="margin:0">Customer Report</h3><span class="small muted">Top customers by value and containers</span></div>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th>Customer</th><th>Shipments</th><th>Containers</th><th>Cartons</th><th>Amount</th><th>Amount %</th><th>Containers %</th></tr>
+        {% for r in customers %}
+        <tr>
+          <td>{{ r.customer_name }}</td>
+          <td>{{ r.shipments_count }}</td>
+          <td>{{ r.total_containers }}</td>
+          <td>{{ r.total_cartons }}</td>
+          <td>{{ '%.0f'|format(r.total_invoice_amount or 0) }}</td>
+          <td><span class="badge">{{ r.amount_pct }}%</span></td>
+          <td><span class="badge">{{ r.containers_pct }}%</span></td>
+        </tr>
+        {% else %}<tr><td colspan="7" class="muted">No data.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="topbar" style="margin-bottom:12px"><h3 style="margin:0">Product Report</h3><span class="small muted">Items, cartons and contribution</span></div>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th>Category</th><th>Item</th><th>Shipments</th><th>Containers</th><th>Cartons</th><th>Amount</th><th>Amount %</th></tr>
+        {% for r in products %}
+        <tr>
+          <td>{{ r.product_category }}</td>
+          <td>{{ r.item_name }}</td>
+          <td>{{ r.shipments_count }}</td>
+          <td>{{ r.total_containers }}</td>
+          <td>{{ r.total_cartons }}</td>
+          <td>{{ '%.0f'|format(r.total_invoice_amount or 0) }}</td>
+          <td><span class="badge">{{ r.amount_pct }}%</span></td>
+        </tr>
+        {% else %}<tr><td colspan="7" class="muted">No data.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px">
+  <div class="topbar" style="margin-bottom:12px"><h3 style="margin:0">Booking / Shipment Report</h3><span class="small muted">Latest movement by booking</span></div>
+  <div class="table-wrap">
+    <table class="table">
+      <tr><th>Shipment</th><th>Customer</th><th>Containers</th><th>Cartons</th><th>Invoice</th><th>Status</th><th>ETD</th><th>ETA</th></tr>
+      {% for r in bookings %}
+      <tr>
+        <td>{{ r.shipment_no }}</td>
+        <td>{{ r.company }}</td>
+        <td>{{ r.container_count }} {{ r.container_type }}</td>
+        <td>{{ r.cartons_count }}</td>
+        <td>{{ r.invoice_amount }} {{ r.currency }}</td>
+        <td><span class="badge">{{ r.current_status }}</span></td>
+        <td>{% if r.etd_at and r.etd_at > 0 %}{{ r.etd_at|int|datetimeformat }}{% else %}-{% endif %}</td>
+        <td>{% if r.eta_at and r.eta_at > 0 %}{{ r.eta_at|int|datetimeformat }}{% else %}-{% endif %}</td>
+      </tr>
+      {% else %}<tr><td colspan="8" class="muted">No bookings.</td></tr>{% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>.quick-action{display:flex;gap:6px;flex-wrap:wrap}.quick-action form{display:inline-flex;margin:0}.step-box{padding:12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}</style>
+<div class="grid-hero" style="margin-bottom:18px">
+  <div class="hero-brand">
+    <span class="brand-chip">Sequence detail</span>
+    <h1>{{ sequence.sequence_name }}</h1>
+    <p class="muted">{{ sequence.status }} · {{ sequence.profile_name or '-' }} · Stop on reply: {{ 'Yes' if sequence.stop_on_reply else 'No' }}</p>
+    <div class="row" style="margin-top:10px">
+      <form method="post" action="/campaign-v2/sequence/{{ sequence.id }}/run" style="display:flex;gap:8px;align-items:center">
+        <input type="number" name="limit" value="50" min="1" max="500" style="width:110px">
+        <button type="submit">Run due steps</button>
+      </form>
+      <form method="post" action="/campaign-v2/sequence/{{ sequence.id }}/status"><input type="hidden" name="status" value="paused"><button type="submit">Pause</button></form>
+      <form method="post" action="/campaign-v2/sequence/{{ sequence.id }}/status"><input type="hidden" name="status" value="active"><button type="submit">Resume</button></form>
+    </div>
+  </div>
+  <div class="sand-card">
+    <div class="tahhan-kicker">Notes</div>
+    <div class="small muted">{{ sequence.notes or 'No notes added.' }}</div>
+  </div>
+</div>
+
+<div class="grid grid-3" style="margin-bottom:18px">
+  <div class="kpi"><div class="muted">Total</div><div class="num">{{ sequence.total_enrollments }}</div></div>
+  <div class="kpi"><div class="muted">Active</div><div class="num">{{ sequence.active_enrollments }}</div></div>
+  <div class="kpi"><div class="muted">Completed</div><div class="num">{{ sequence.completed_enrollments }}</div></div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Sequence steps</h3>
+    <div class="grid" style="gap:10px">
+      {% for step in steps %}
+      <div class="step-box">
+        <b>Step {{ step.step_order }} — {{ step.step_name }}</b>
+        <div class="muted small">Delay after previous send: {{ step.delay_hours }} hours</div>
+        <div class="small" style="margin-top:8px"><b>Subject:</b> {{ step.subject_template }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="card">
+    <h3>Recent events</h3>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th>Event</th><th>Value</th><th>Time</th></tr>
+        {% for e in events %}
+        <tr><td>{{ e.event_type }}</td><td>{{ e.event_value }}</td><td>{{ e.created_at }}</td></tr>
+        {% else %}
+        <tr><td colspan="3" class="muted">No events yet.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Enrollments</h3>
+  <div class="table-wrap">
+    <table class="table">
+      <tr><th>ID</th><th>Email</th><th>Company</th><th>Step</th><th>Status</th><th>Next run</th><th>Action</th></tr>
+      {% for row in enrollments %}
+      <tr>
+        <td>{{ row.id }}</td>
+        <td>{{ row.email }}</td>
+        <td>{{ row.company or '-' }}</td>
+        <td>{{ row.current_step }}</td>
+        <td>{{ row.status }}</td>
+        <td>{{ row.next_run_at }}</td>
+        <td>
+          <div class="quick-action">
+            <form method="post" action="/campaign-v2/sequence/{{ sequence.id }}/event/{{ row.id }}"><input type="hidden" name="event_type" value="reply"><button type="submit">Reply</button></form>
+            <form method="post" action="/campaign-v2/sequence/{{ sequence.id }}/event/{{ row.id }}"><input type="hidden" name="event_type" value="bounce"><button type="submit">Bounce</button></form>
+            <form method="post" action="/campaign-v2/sequence/{{ sequence.id }}/event/{{ row.id }}"><input type="hidden" name="event_type" value="unsubscribe"><button type="submit">Unsubscribe</button></form>
+          </div>
+          {% if row.error_message %}<div class="muted small" style="margin-top:6px">{{ row.error_message }}</div>{% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="muted">No enrollments yet.</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

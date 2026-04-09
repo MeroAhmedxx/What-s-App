@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="grid grid-2">
+  <div class="card">
+    <div class="topbar"><h1 style="margin:0">Campaign send logs</h1><a class="btn btn-secondary fit" href="/campaign-v2/campaigns">Campaigns</a></div>
+    <div class="table-wrap" style="margin-top:12px">
+      <table class="table">
+        <tr><th>ID</th><th>Campaign</th><th>Email</th><th>Provider</th><th>Status</th><th>Code</th><th>Message</th><th>Time</th></tr>
+        {% for row in rows %}
+        <tr>
+          <td>{{ row.id }}</td>
+          <td>{{ row.campaign_name or row.campaign_id }}</td>
+          <td>{{ row.email or '-' }}</td>
+          <td>{{ row.provider or '-' }}</td>
+          <td>{{ row.status }}</td>
+          <td>{{ row.response_code or '-' }}</td>
+          <td>{{ row.response_message or '-' }}</td>
+          <td>{{ row.created_at }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="muted">No campaign send attempts yet.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="topbar"><h1 style="margin:0">Sequence activity</h1><a class="btn btn-secondary fit" href="/campaign-v2/sequences">Sequences</a></div>
+    <div class="table-wrap" style="margin-top:12px">
+      <table class="table">
+        <tr><th>Sequence</th><th>Email</th><th>Event</th><th>Value</th><th>Time</th></tr>
+        {% for row in sequence_rows %}
+        <tr>
+          <td>{{ row.sequence_name or row.sequence_id }}</td>
+          <td>{{ row.email or '-' }}</td>
+          <td>{{ row.event_type }}</td>
+          <td>{{ row.event_value or '-' }}</td>
+          <td>{{ row.created_at }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="muted">No sequence activity yet.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

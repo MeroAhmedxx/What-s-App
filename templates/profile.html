@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>My Profile</h1></div>
+{% set error = request.query_params.get('error') %}
+{% set success = request.query_params.get('success') %}
+{% if error %}<div class="card" style="border-color:#ffb86c;color:#ffb86c">{% if error == 'password_short' %}Password must be at least 4 characters.{% else %}Please review the form and try again.{% endif %}</div>{% endif %}
+{% if success %}<div class="card" style="border-color:#2ec27e;color:#2ec27e">{% if success == 'profile_saved' %}Profile updated successfully.{% elif success == 'password_requested' %}Password change request sent to admin.{% else %}Saved successfully.{% endif %}</div>{% endif %}
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Profile details</h3>
+    <div class="profile-head" style="margin-bottom:14px">
+      <img src="{{ '/uploads/avatars/' ~ (profile_user.avatar_path or '') if profile_user.avatar_path else '/static/assets/logo.png' }}" class="profile-avatar-lg">
+      <div>
+        <div style="font-size:22px;font-weight:700">{{ profile_user.display_name or profile_user.username }}</div>
+        <div class="muted">@{{ profile_user.username }}</div>
+        <div class="muted small">{{ profile_user.job_title or 'No title yet' }}</div>
+      </div>
+    </div>
+    <form method="post" action="/profile/save" enctype="multipart/form-data" class="grid">
+      <input name="display_name" value="{{ profile_user.display_name or '' }}" placeholder="Display name">
+      <input name="job_title" value="{{ profile_user.job_title or '' }}" placeholder="Job title / title">
+      <input type="file" name="avatar" accept="image/*">
+      <button type="submit">Save profile</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Password change request</h3>
+    <p class="muted small">Submit a new password request. It will go to admin for approval before changing your login password.</p>
+    <form method="post" action="/profile/request-password" class="grid">
+      <input type="password" name="new_password" placeholder="New password" required>
+      <button type="submit">Send request to admin</button>
+    </form>
+    {% if profile_user.password_change_requested %}
+      <div class="card" style="margin-top:14px;border-color:#ffb86c;color:#ffb86c">Pending admin approval.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

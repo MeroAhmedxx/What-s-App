@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Templates</h1></div>
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Email Style Simple Editor</h3>
+    <div class="vars">
+      {% for v in variables %}<button type="button" onclick="insertVar('{{ v }}')">{{ v }}</button>{% endfor %}
+    </div>
+    <form method="post" action="/templates/save">
+      <input name="template_id" id="template_id" type="hidden" value="0">
+      <input name="name" id="name" placeholder="Template name" required>
+      <input name="subject" id="subject" placeholder="Email subject" required>
+      <textarea name="body" id="body" placeholder="Write the email body" required></textarea>
+      <div class="row"><button type="submit" class="fit">Save Template</button><button class="fit btn-secondary" type="button" onclick="clearForm()">New</button></div>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Saved Templates</h3>
+    <table class="table">
+      <tr><th>Name</th><th>Subject</th><th>Actions</th></tr>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.name }}</td>
+        <td>{{ r.subject }}</td>
+        <td>
+          <button onclick='loadTpl({{ r.id }}, {{ r.name|tojson }}, {{ r.subject|tojson }}, {{ r.body|tojson }})'>Edit</button>
+          <form method="post" action="/templates/{{ r.id }}/delete" style="display:inline-block"><button class="btn-danger" type="submit">Delete</button></form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+<script>
+function insertVar(v){ const body=document.getElementById('body'); body.value += (body.value ? ' ' : '') + v; }
+function clearForm(){ document.getElementById('template_id').value='0'; document.getElementById('name').value=''; document.getElementById('subject').value=''; document.getElementById('body').value=''; }
+function loadTpl(id,name,subject,body){ document.getElementById('template_id').value=id; document.getElementById('name').value=name; document.getElementById('subject').value=subject; document.getElementById('body').value=body; window.scrollTo({top:0,behavior:'smooth'}); }
+</script>
+{% endblock %}

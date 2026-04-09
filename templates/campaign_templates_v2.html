@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Email Templates V2</h1><div class="muted small">Personal or team templates with merge variables.</div></div>
+<div class="card">
+  <form method="post" action="/campaign-v2/templates/add" class="grid">
+    <div class="grid grid-3">
+      <select name="owner_scope"><option value="user">Personal</option><option value="team">Team</option></select>
+      <input name="team_name" placeholder="Team name (if team scope)">
+      <input name="template_name" placeholder="Template name" required>
+    </div>
+    <input name="subject_template" placeholder="Subject template" required>
+    <textarea name="body_html" placeholder="HTML body" rows="10" required></textarea>
+    <textarea name="body_text" placeholder="Plain text body" rows="5"></textarea>
+    <input name="variables_json" placeholder='["company","contact_name","country","sender_name"]' value='["company","contact_name","country","sender_name"]'>
+    <button type="submit">Save Template</button>
+  </form>
+</div>
+<div class="card" style="margin-top:18px">
+  <h3>Templates</h3>
+  <table class="table">
+    <tr><th>ID</th><th>Name</th><th>Scope</th><th>Owner</th><th>Subject</th></tr>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row.id }}</td>
+      <td>{{ row.template_name }}</td>
+      <td>{{ row.owner_scope }}</td>
+      <td>{{ row.owner_username or row.team_name or '-' }}</td>
+      <td>{{ row.subject_template }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

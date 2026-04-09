@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>{{ row.title }}</h1></div>
+<div class="card"><div class="pre">{{ row.body }}</div><div class="small muted">{{ row.author }}</div></div>
+<div class="card">
+  <h3>Replies</h3>
+  {% for r in replies %}<div class="card"><div class="small muted">{{ r.author }}</div><div class="pre">{{ r.body }}</div></div>{% endfor %}
+  <form method="post" action="/announcement/{{ row.id }}/reply" class="grid"><textarea name="body" placeholder="Reply" required></textarea><button type="submit">Reply</button></form>
+</div>
+{% endblock %}

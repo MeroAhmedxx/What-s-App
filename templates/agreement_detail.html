@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar">
+  <h1>{{ item.title }}</h1>
+  <div class="actions"><a class="btn" href="/agreements">Back</a></div>
+</div>
+<div class="grid grid-3">
+  <div class="kpi"><div class="muted">Category</div><div class="num" style="font-size:18px">{{ item.category }}</div></div>
+  <div class="kpi"><div class="muted">Region</div><div class="num" style="font-size:18px">{{ item.region or '-' }}</div></div>
+  <div class="kpi"><div class="muted">Effective year</div><div class="num" style="font-size:18px">{{ item.effective_year or '-' }}</div></div>
+</div>
+<div class="card">
+  <div class="grid grid-2">
+    <div>
+      <div class="muted small">Type</div>
+      <div>{{ item.item_type or '-' }}</div>
+    </div>
+    <div>
+      <div class="muted small">Status</div>
+      <div>{{ item.status or '-' }}</div>
+    </div>
+    <div style="grid-column:1/-1">
+      <div class="muted small">Partner countries / scope</div>
+      <div>{{ item.partner_countries or '-' }}</div>
+    </div>
+    <div style="grid-column:1/-1">
+      <div class="muted small">Summary</div>
+      <div>{{ item.summary or '-' }}</div>
+    </div>
+    <div style="grid-column:1/-1">
+      <div class="muted small">Benefits / commercial impact</div>
+      <div>{{ item.benefits or '-' }}</div>
+    </div>
+    <div style="grid-column:1/-1">
+      <div class="muted small">Rules of origin / compliance note</div>
+      <div>{{ item.rules_of_origin or '-' }}</div>
+    </div>
+    <div>
+      <div class="muted small">Official source</div>
+      <div>{{ item.source_org or '-' }}</div>
+    </div>
+    <div>
+      <div class="muted small">Source link</div>
+      <div style="word-break:break-all"><a href="{{ item.source_url }}" target="_blank">Open official source</a></div>
+    </div>
+    <div style="grid-column:1/-1">
+      <div class="muted small">Tags</div>
+      <div>{{ item.tags or '-' }}</div>
+    </div>
+  </div>
+</div>
+{% if related %}
+<div class="card">
+  <h3 style="margin-top:0">Related references</h3>
+  <div class="grid grid-2">
+    {% for r in related %}
+    <a class="mini-card" href="/agreement/{{ r.id }}">
+      <div class="muted small">{{ r.category }} · {{ r.region }}</div>
+      <div><strong>{{ r.title }}</strong></div>
+      <div class="muted small">{{ r.partner_countries }}</div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

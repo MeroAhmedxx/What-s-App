@@ -1,0 +1,51 @@
+
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Current Clients & Analytics</h1><div class="actions"><a class="btn" href="/reports">Reports</a>{% if user.role == 'admin' %}<form method="post" action="/current-clients/import-bundled"><button type="submit">Sync Morocco file</button></form>{% endif %}</div></div>
+<div class="card">
+  <form method="get" class="row">
+    <input name="q" value="{{ q }}" placeholder="Search code, company, address, bank">
+    <select name="country"><option value="">All countries</option>{% for c in countries %}<option value="{{ c.country }}" {% if country_filter == c.country %}selected{% endif %}>{{ c.country }}</option>{% endfor %}</select>
+    <button type="submit" class="fit">Search</button>
+  </form>
+</div>
+<div class="grid grid-4">
+  <div class="kpi"><div class="muted">Current Clients & Analytics</div><div class="num">{{ rows|length }}</div></div>
+  <div class="kpi"><div class="muted">Client Invoices</div><div class="num">{{ total_invoices }}</div></div>
+</div>
+<div class="card">
+  <details>
+    <summary><b>Add current client manually</b></summary>
+    <form method="post" action="/current-clients/add" class="grid grid-3" style="margin-top:14px">
+      <input name="customer_code" placeholder="Customer code">
+      <input name="country" placeholder="Country">
+      <input name="company_ar" placeholder="Company Arabic name">
+      <input name="company_en" placeholder="Company English name" required>
+      <input name="ice" placeholder="ICE">
+      <input name="swift_code" placeholder="SWIFT">
+      <input name="postal_code" placeholder="Postal code">
+      <input name="bank_name" placeholder="Bank name">
+      <input name="bank_address" placeholder="Bank address">
+      <input name="address" placeholder="Client address">
+      <input name="iban_account" placeholder="IBAN / Account">
+      <div class="fit"><button type="submit">Add client</button></div>
+    </form>
+  </details>
+</div>
+<div class="card">
+  <table class="table">
+    <tr><th>Code</th><th>Country</th><th>English Name</th><th>Arabic Name</th><th>Bank</th><th>SWIFT</th><th>Action</th></tr>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row.customer_code }}</td>
+      <td>{{ row.country }}</td>
+      <td>{{ row.company_en }}</td>
+      <td>{{ row.company_ar }}</td>
+      <td>{{ row.bank_name }}</td>
+      <td>{{ row.swift_code }}</td>
+      <td><a href="/current-client/{{ row.id }}">Open</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+.seq-step{padding:12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.seq-step textarea{min-height:110px}
+</style>
+<div class="grid-hero" style="margin-bottom:18px">
+  <div class="hero-brand">
+    <span class="brand-chip">Auto email</span>
+    <h1>Sequences with stop-on-reply logic</h1>
+    <p class="muted">Build a 1-to-3 step follow-up sequence, enroll leads, run due steps, and stop the automation when a reply, bounce, unsubscribe, open or click should end the flow.</p>
+  </div>
+  <div class="sand-card">
+    <div class="tahhan-kicker">Best use cases</div>
+    <div class="small muted">Intro offer → follow-up reminder → last touch. This is the easiest path to turn outreach into a sellable automation module without needing a full external inbox sync on day one.</div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h2 style="margin-top:0">Create sequence</h2>
+    <form method="post" action="/campaign-v2/sequences/create" class="grid">
+      <input name="sequence_name" placeholder="Sequence name" required>
+      <select name="profile_id" required>
+        <option value="">Select sending profile</option>
+        {% for p in profiles %}<option value="{{ p.id }}">{{ p.profile_name }} — {{ p.from_email or p.provider }}</option>{% endfor %}
+      </select>
+      <textarea name="notes" placeholder="Sequence objective, target market, reminders"></textarea>
+      <div class="row" style="gap:14px;flex-wrap:wrap">
+        <label><input type="checkbox" name="stop_on_reply" value="1" checked> Stop on reply</label>
+        <label><input type="checkbox" name="stop_on_click" value="1"> Stop on click</label>
+        <label><input type="checkbox" name="stop_on_open" value="1"> Stop on open</label>
+      </div>
+
+      <div class="seq-step">
+        <b>Step 1</b>
+        <div class="grid grid-2" style="margin-top:8px">
+          <input name="step1_name" value="Intro email" placeholder="Step label">
+          <input type="number" name="step1_delay_hours" value="0" min="0" placeholder="Delay hours">
+        </div>
+        <input name="step1_subject" placeholder="Subject" required style="margin-top:8px">
+        <textarea name="step1_body" placeholder="HTML body" required style="margin-top:8px"></textarea>
+      </div>
+
+      <div class="seq-step">
+        <b>Step 2</b>
+        <div class="grid grid-2" style="margin-top:8px">
+          <input name="step2_name" value="Follow-up 1" placeholder="Step label">
+          <input type="number" name="step2_delay_hours" value="48" min="0" placeholder="Delay hours">
+        </div>
+        <input name="step2_subject" placeholder="Subject (optional)" style="margin-top:8px">
+        <textarea name="step2_body" placeholder="HTML body (optional)" style="margin-top:8px"></textarea>
+      </div>
+
+      <div class="seq-step">
+        <b>Step 3</b>
+        <div class="grid grid-2" style="margin-top:8px">
+          <input name="step3_name" value="Follow-up 2" placeholder="Step label">
+          <input type="number" name="step3_delay_hours" value="96" min="0" placeholder="Delay hours">
+        </div>
+        <input name="step3_subject" placeholder="Subject (optional)" style="margin-top:8px">
+        <textarea name="step3_body" placeholder="HTML body (optional)" style="margin-top:8px"></textarea>
+      </div>
+
+      <div class="seq-step">
+        <div class="topbar" style="margin-bottom:8px"><b>Enroll leads</b><span class="muted small">Only leads with email are shown.</span></div>
+        <select name="lead_ids" multiple size="12" style="width:100%">
+          {% for lead in leads %}
+          <option value="{{ lead.id }}">#{{ lead.id }} — {{ lead.company }} — {{ lead.contact_person or '-' }} — {{ lead.email }} — {{ lead.country or '-' }} — {{ lead.stage or '-' }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit">Create sequence</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">My sequences</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th>ID</th><th>Name</th><th>Status</th><th>Total</th><th>Active</th><th>Completed</th></tr>
+        {% for row in rows %}
+        <tr>
+          <td>{{ row.id }}</td>
+          <td><a href="/campaign-v2/sequence/{{ row.id }}">{{ row.sequence_name }}</a></td>
+          <td>{{ row.status }}</td>
+          <td>{{ row.total_enrollments }}</td>
+          <td>{{ row.active_enrollments }}</td>
+          <td>{{ row.completed_enrollments }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="muted">No sequences yet.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

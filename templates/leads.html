@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1 style="margin-bottom:6px">Leads Hub</h1>
+    <div class="muted">Track opportunities, assign owners, import Excel lists, and follow up faster.</div>
+  </div>
+  <div class="actions" style="display:flex;gap:10px;flex-wrap:wrap">
+    <a class="btn btn-secondary" href="/leads/template">Download Template</a>
+    <a class="btn btn-secondary" href="/export_leads">Export Excel</a>
+    {% if user.role == 'admin' %}<a class="btn btn-secondary" href="/analytics">Analytics</a>{% endif %}
+  </div>
+</div>
+
+<div class="grid-hero" style="margin-bottom:18px">
+  <div class="hero-brand">
+    <span class="brand-chip">Lead Pipeline</span>
+    <h1 style="margin-top:10px">Build your export pipeline in a cleaner way</h1>
+    <p class="muted" style="max-width:760px">Use Excel import, filters, owners, stages, and follow-up dates to keep the sales/export pipeline visible for the whole team.</p>
+    <div class="soft-line" style="margin:16px 0"></div>
+    <form method="post" action="/import_excel" enctype="multipart/form-data" class="row" style="gap:10px;align-items:center;flex-wrap:wrap">
+      <input type="file" name="file" accept=".xlsx" required class="fit">
+      <button type="submit" class="fit">Import Excel</button>
+      <span class="small muted">Supports Company, Contact Person, Email, Phone, Country, Source, Assigned To, Stage, Value and Notes.</span>
+    </form>
+  </div>
+  <div class="sand-card">
+    <div class="tahhan-kicker">Quick summary</div>
+    <div class="grid grid-2" style="margin-top:12px">
+      <div class="kpi"><div class="muted">All Leads</div><div class="num">{{ summary.all }}</div></div>
+      <div class="kpi"><div class="muted">Hot Leads</div><div class="num">{{ summary.hot }}</div></div>
+      <div class="kpi"><div class="muted">Won</div><div class="num">{{ summary.won }}</div></div>
+      <div class="kpi"><div class="muted">Open Value</div><div class="num">{{ '%.0f'|format(summary.value or 0) }}</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Search & Filter</h3>
+  <form method="get" action="/leads" class="grid grid-4">
+    <input name="q" value="{{ q or '' }}" placeholder="Search company, contact, email, phone, country, tags">
+    <select name="stage">
+      <option value="">All stages</option>
+      {% for s in ['Lead','Contacted','Negotiation','Quotation','Won','Lost'] %}<option value="{{ s }}" {% if stage_filter==s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+    </select>
+    <select name="assigned_to">
+      <option value="">All owners</option>
+      {% for u in users %}<option value="{{ u.username }}" {% if assigned_filter==u.username %}selected{% endif %}>{{ u.display_name or u.username }}</option>{% endfor %}
+    </select>
+    <select name="source">
+      <option value="">All sources</option>
+      {% for s in sources %}<option value="{{ s.source }}" {% if source_filter==s.source %}selected{% endif %}>{{ s.source }}</option>{% endfor %}
+    </select>
+    <button type="submit">Apply Filter</button>
+    <a class="btn btn-secondary" href="/leads">Clear</a>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Add Lead / Opportunity</h3>
+  <form method="post" action="/leads/add" class="grid grid-4">
+    <input name="company" placeholder="Company" required>
+    <input name="contact_person" placeholder="Contact person">
+    <input name="phone" placeholder="Phone / WhatsApp">
+    <input name="email" placeholder="Email">
+    <input name="country" placeholder="Country">
+    <input name="city" placeholder="City">
+    <input name="source" placeholder="Lead source (website, fair, LinkedIn)">
+    <select name="assigned_to">
+      <option value="">Unassigned</option>
+      {% for u in users %}<option value="{{ u.username }}">{{ u.display_name or u.username }}</option>{% endfor %}
+    </select>
+    <input name="tags" placeholder="Tags: importer, Saudi, urgent">
+    <input name="type" placeholder="Type / Product">
+    <input name="status" placeholder="Status" value="New">
+    <select name="stage"><option>Lead</option><option>Contacted</option><option>Negotiation</option><option>Quotation</option><option>Won</option><option>Lost</option></select>
+    <input name="estimated_value" type="number" step="0.01" placeholder="Estimated Value">
+    <textarea name="notes" placeholder="Lead notes / inquiry details"></textarea>
+    <button type="submit">Add Lead</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="topbar" style="margin-bottom:14px">
+    <h3 style="margin:0">Lead Cards</h3>
+    <div class="small muted">{{ leads|length }} result(s)</div>
+  </div>
+  <div class="lead-cards">
+    {% for lead in leads %}
+    <div class="lead-card">
+      <div class="lead-card-top">
+        <div>
+          <div class="lead-company"><a href="/lead/{{ lead.id }}">{{ lead.company }}</a></div>
+          <div class="small muted">{{ lead.country or '-' }}{% if lead.city %}, {{ lead.city }}{% endif %}</div>
+        </div>
+        <span class="badge">{{ lead.stage }}</span>
+      </div>
+      <div class="lead-meta-grid">
+        <div><span class="muted">Owner</span><div class="contrast-value">{{ lead.assigned_to or 'Unassigned' }}</div></div>
+        <div><span class="muted">Source</span><div class="contrast-value">{{ lead.source or '-' }}</div></div>
+        <div><span class="muted">Contact</span><div class="contrast-value">{{ lead.contact_person or '-' }}</div></div>
+        <div><span class="muted">Email / Phone</span><div class="contrast-value">{{ lead.email or lead.phone or '-' }}</div></div>
+      </div>
+      <div class="row" style="justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap">
+        <div class="row" style="gap:8px;flex-wrap:wrap">
+          <span class="badge priority-{{ 'urgent' if (lead.score or 0) >= 75 else 'high' if (lead.score or 0) >= 50 else 'medium' }}">Score {{ lead.score or 0 }}</span>
+          <span class="badge">Value {{ lead.estimated_value or 0 }}</span>
+        </div>
+        <a class="btn btn-secondary" href="/lead/{{ lead.id }}">Open</a>
+      </div>
+      <form method="post" action="/leads/{{ lead.id }}/followup" class="row lead-follow-row">
+        <input name="days" type="number" min="1" placeholder="Follow-up in days">
+        <button type="submit">Set Follow-up</button>
+      </form>
+    </div>
+    {% else %}
+    <div class="card">No leads found.</div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <details>
+    <summary style="cursor:pointer;font-weight:800">Open table view</summary>
+    <div class="table-wrap" style="margin-top:12px">
+      <table class="table">
+        <tr><th>ID</th><th>Company</th><th>Owner</th><th>Contact</th><th>Source</th><th>Stage</th><th>Score</th><th>Value</th><th>Open</th></tr>
+        {% for lead in leads %}
+        <tr>
+          <td>{{ lead.id }}</td>
+          <td><a href="/lead/{{ lead.id }}">{{ lead.company }}</a></td>
+          <td>{{ lead.assigned_to or '-' }}</td>
+          <td>{{ lead.contact_person or '-' }}</td>
+          <td>{{ lead.source or '-' }}</td>
+          <td><span class="badge">{{ lead.stage }}</span></td>
+          <td>{{ lead.score or 0 }}</td>
+          <td>{{ lead.estimated_value or 0 }}</td>
+          <td><a class="btn btn-secondary" href="/lead/{{ lead.id }}">Open</a></td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </details>
+</div>
+{% endblock %}

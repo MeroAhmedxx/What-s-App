@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Campaigns</h1>{% if is_mobile %}<div class="muted small">All campaign pages stay visible on mobile. Only Outlook sending actions are disabled from mobile.</div>{% endif %}</div>
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Create Campaign</h3>
+    <form method="post" action="/campaigns/create">
+      <fieldset {% if is_mobile %}disabled{% endif %} style="border:0;padding:0;margin:0">
+      <div class="grid">
+        <input name="name" placeholder="Campaign name" required>
+        <select name="sender_mode"><option value="outlook">Outlook Desktop Bridge</option><option value="smtp">SMTP / Microsoft 365</option></select>
+        <div class="muted small">Outlook Desktop Bridge = كل موظف يبعث من Outlook على جهازه بعد تشغيل الـ Agent.</div><div class="row"><a class="header-link" href="/bridge">Open Outlook Bridge setup</a><span class="muted small">Register devices first, then queue the campaign.</span></div>
+        <div class="row">
+          <select id="template_select" name="template_id">
+            <option value="0">Select Template</option>
+            {% for t in templates_rows %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}
+          </select>
+          <button class="fit" type="button" onclick="loadSelectedTemplate()">Load Template</button>
+        </div>
+        <div class="vars">{% for v in variables %}<button class="fit" type="button" onclick="insertCampaignVar('{{ v }}')">{{ v }}</button>{% endfor %}</div>
+        <input id="campaign_subject" name="subject" placeholder="Subject" required>
+        <textarea id="campaign_body" name="body" placeholder="Email body" required></textarea>
+        <label>Select Leads</label>
+        <div style="max-height:260px;overflow:auto;border:1px solid #374151;border-radius:8px;padding:10px">
+          {% for l in leads %}
+            <div><label><input type="checkbox" name="lead_ids" value="{{ l.id }}"> {{ l.company }} — {{ l.email }}</label></div>
+          {% endfor %}
+        </div>
+        <button type="submit">Create Campaign</button>{% if is_mobile %}<div class="muted small" style="margin-top:8px">Desktop browser required to submit this form.</div>{% endif %}
+      </div>
+    {% if is_mobile %}<div class="muted small" style="margin-top:10px">Creation is visible here for review, but actual email sending/queueing is blocked on mobile.</div>{% endif %}</fieldset>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Campaign History</h3>
+    <table class="table"><tr><th>ID</th><th>Name</th><th>Status</th><th>Mode</th></tr>{% for c in campaigns %}<tr><td>{{ c.id }}</td><td><a href="/campaign/{{ c.id }}">{{ c.name }}</a></td><td>{{ c.status }}</td><td>{{ c.sender_mode }}</td></tr>{% endfor %}</table>
+  </div>
+</div>
+<script>
+async function loadSelectedTemplate(){
+  const id = document.getElementById('template_select').value; if(!id || id === '0') return;
+  const res = await fetch('/template/' + id); const data = await res.json();
+  if(data.ok){ document.getElementById('campaign_subject').value = data.template.subject || ''; document.getElementById('campaign_body').value = data.template.body || ''; }
+}
+function insertCampaignVar(v){ const body=document.getElementById('campaign_body'); body.value += (body.value ? ' ' : '') + v; }
+</script>
+{% endblock %}

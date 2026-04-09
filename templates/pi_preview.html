@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>PI Preview — {{ lead.company }}</h1></div>
+<div class="card pre">ALTTAHHAN DATES\n\nProforma Invoice Preview\n\nCompany: {{ lead.company }}\nEmail: {{ lead.email }}\nCountry: {{ lead.country }}\nType: {{ lead.type }}\nStage: {{ lead.stage }}\nEstimated Value: {{ lead.estimated_value }}\n\nThis is a preview hook for the future PDF generator.</div>
+{% endblock %}

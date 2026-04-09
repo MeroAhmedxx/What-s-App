@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="grid-hero" style="margin-bottom:18px">
+  <div class="hero-brand">
+    <span class="brand-chip">Reply sync groundwork</span>
+    <h1>Replies, bounces and unsubscribe control</h1>
+    <p class="muted">Use this page to log manual inbox outcomes today, keep a clean suppression list, and prepare the product for future Microsoft Graph or Gmail sync.</p>
+  </div>
+  <div class="sand-card">
+    <div class="tahhan-kicker">Why this matters</div>
+    <div class="small muted">This is the key difference between a sending screen and a reusable outreach product. Once a contact replies, bounces or unsubscribes, the next campaign or sequence step should stop.</div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h2 style="margin-top:0">Log inbox event</h2>
+    <form method="post" action="/campaign-v2/replies/log" class="grid">
+      <div class="grid grid-2">
+        <select name="event_type">
+          <option value="reply">Reply</option>
+          <option value="bounce">Bounce</option>
+          <option value="unsubscribe">Unsubscribe</option>
+        </select>
+        <input name="provider" value="manual" placeholder="Provider or source">
+      </div>
+      <input name="email" placeholder="contact@example.com" required>
+      <div class="grid grid-2">
+        <select name="campaign_id">
+          <option value="0">Optional campaign</option>
+          {% for c in recent_campaigns %}<option value="{{ c.id }}">#{{ c.id }} — {{ c.campaign_name }}</option>{% endfor %}
+        </select>
+        <select name="sequence_id">
+          <option value="0">Optional sequence</option>
+          {% for s in recent_sequences %}<option value="{{ s.id }}">#{{ s.id }} — {{ s.sequence_name }}</option>{% endfor %}
+        </select>
+      </div>
+      <input name="recipient_id" type="number" min="0" value="0" placeholder="Optional recipient id">
+      <input name="enrollment_id" type="number" min="0" value="0" placeholder="Optional enrollment id">
+      <textarea name="details" placeholder="What happened? Example: Customer replied and requested price list."></textarea>
+      <button type="submit">Log event</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Manual suppression</h2>
+    <form method="post" action="/campaign-v2/suppression/add" class="grid">
+      <input name="email" placeholder="contact@example.com" required>
+      <select name="reason">
+        <option value="manual">Manual block</option>
+        <option value="bounce">Bounce</option>
+        <option value="unsubscribe">Unsubscribe</option>
+      </select>
+      <textarea name="notes" placeholder="Why should this email never receive outreach again?"></textarea>
+      <button type="submit">Add to suppression list</button>
+    </form>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <h3>Recent inbox events</h3>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th>Type</th><th>Email</th><th>Provider</th><th>Details</th><th>Time</th></tr>
+        {% for row in inbox_rows %}
+        <tr><td>{{ row.event_type }}</td><td>{{ row.email }}</td><td>{{ row.provider }}</td><td>{{ row.details or '-' }}</td><td>{{ row.created_at }}</td></tr>
+        {% else %}
+        <tr><td colspan="5" class="muted">No inbox events yet.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Suppression list</h3>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th>Email</th><th>Reason</th><th>Source</th><th>Action</th></tr>
+        {% for row in suppression_rows %}
+        <tr>
+          <td>{{ row.email }}</td>
+          <td>{{ row.reason }}</td>
+          <td>{{ row.source }}</td>
+          <td><form method="post" action="/campaign-v2/suppression/{{ row.id }}/reactivate"><button type="submit">Reactivate</button></form></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="muted">Suppression list is empty.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="grid-hero"><div class="hero-brand"><div class="tahhan-kicker">Al Tahhan Outlook Bridge</div><h1>Outlook Bridge</h1><div class="muted">Connect each employee device to the web app so campaigns stay managed inside Al Tahhan Export Tool while sending happens from the Outlook account already open on that employee PC.</div><div class="row" style="margin-top:14px"><span class="brand-chip">Device tokens</span><span class="brand-chip">Bridge monitor</span><span class="brand-chip">Desktop Outlook</span></div></div><div class="sand-card"><h3 style="margin-top:0">Use case</h3><div class="small muted">Best for export staff who already use Outlook Desktop and need campaign sending without SMTP setup on the server.</div><div class="row" style="margin-top:12px"><a class="btn fit" href="/email-tool">Email Tool</a><a class="btn btn-secondary fit" href="/bridge/monitor">Bridge Monitor</a></div></div></div>
+<div class="grid grid-2">
+  <div class="card">
+    {% if is_mobile %}<div class="alert">You can review bridge devices on mobile, but token generation and device control are available from desktop only.</div>{% endif %}
+    <h3>Register This User Device</h3>
+    <p class="muted small">سجّل جهاز لكل موظف، وبعدها شغّل برنامج Outlook Bridge Agent على نفس الجهاز.</p>
+    <form method="post" action="/bridge/register">
+      <fieldset {% if is_mobile %}disabled{% endif %} style="border:0;padding:0;margin:0">
+      <div class="grid">
+        <input name="device_name" placeholder="Device name e.g. Sales-PC-01" required>
+        <input name="outlook_account_email" placeholder="Outlook account on this PC (optional)">
+        <button type="submit">Generate Device Token</button>{% if is_mobile %}<div class="muted small">Desktop browser required for this action.</div>{% endif %}
+      </div>
+    </div>
+      </fieldset>
+    </form>
+    {% if new_token %}
+    <div class="alert success" style="margin-top:12px">
+      <b>Device token</b><br>
+      <code style="word-break:break-all">{{ new_token }}</code>
+      <div class="muted small" style="margin-top:8px">Use this token inside the Outlook Bridge Agent on the employee device.</div>
+    </div>
+    {% endif %}
+    <div class="card" style="margin-top:12px">
+      <h4>Agent config</h4>
+      <div class="pre">BASE_URL={{ render_base_url }}
+CRM_DEVICE_TOKEN={{ new_token or 'paste-device-token-here' }}</div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Your Queue</h3>
+    <p><b>Pending bridge jobs:</b> {{ pending_count }}</p>
+    <p class="muted small">When campaigns use <b>Outlook Desktop Bridge</b>, emails are queued here and sent only when the employee runs the local Windows agent with Classic Outlook open.</p>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Registered Devices</h3>
+  <table class="table">
+    <tr><th>ID</th><th>Device</th><th>Outlook</th><th>Last Seen</th><th>Status</th><th>Actions</th></tr>
+    {% for a in agents %}
+    <tr>
+      <td>{{ a.id }}</td>
+      <td>{{ a.device_name }}</td>
+      <td>{{ a.outlook_account_email or '-' }}</td>
+      <td>{{ a.last_seen_at|datetimeformat if a.last_seen_at else '-' }}</td>
+      <td>{% if a.is_active %}<span class="badge">Active</span>{% else %}<span class="badge">Inactive</span>{% endif %}</td>
+      <td>
+        {% if not is_mobile %}
+        <div class="row">
+          {% if a.is_active %}<form method="post" action="/bridge/{{ a.id }}/disable" onsubmit="return confirm('Disable this device?')"><button type="submit">Disable</button></form>{% endif %}
+          <form method="post" action="/bridge/{{ a.id }}/regenerate" onsubmit="return confirm('Generate a new token for this device?')"><button type="submit" class="btn btn-secondary">Regenerate</button></form>
+          <form method="post" action="/bridge/{{ a.id }}/delete" onsubmit="return confirm('Delete this device?')"><button type="submit" class="btn-danger">Delete</button></form>
+        </div>
+        {% else %}Read only on mobile{% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">No bridge devices yet.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

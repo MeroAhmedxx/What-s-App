@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="grid-hero" style="margin-bottom:18px">
+  <div class="hero-brand">
+    <span class="brand-chip" data-i18n="Management-ready overview">Management-ready overview</span>
+    <h1 style="margin-top:10px">{{ 'Executive Operations Dashboard' if user.role == 'admin' else 'My Operations Dashboard' }}</h1>
+    <p class="muted" style="max-width:760px" data-i18n="A cleaner overview for leads, outreach, shipments, follow-ups, documents and customer activity in one place. This is the screen to use when presenting the platform to management.">A cleaner overview for leads, outreach, shipments, follow-ups, documents and customer activity in one place. This is the screen to use when presenting the platform to management.</p>
+    <div class="quick-actions">
+      <a class="btn fit" href="/leads" data-i18n="Open Leads">Open Leads</a>
+      <a class="btn btn-secondary fit" href="/pipeline" data-i18n="Pipeline">Pipeline</a>
+      <a class="btn btn-secondary fit" href="/shipments" data-i18n="Shipments">Shipments</a>
+      <a class="btn btn-secondary fit" href="/email-tool" data-i18n="Outreach Hub">Outreach Hub</a>
+      <a class="btn btn-secondary fit" href="/tour" data-i18n="Product Tour">Product Tour</a>
+    </div>
+  </div>
+  <div class="sand-card">
+    <div class="tahhan-kicker" data-i18n="Executive pulse">Executive pulse</div>
+    <div class="grid grid-2" style="margin-top:12px">
+      <div class="kpi"><div class="muted" data-i18n="Open Shipments">Open Shipments</div><div class="num">{{ stats.shipments_open }}</div></div>
+      <div class="kpi"><div class="muted" data-i18n="Arriving Soon">Arriving Soon</div><div class="num">{{ stats.arriving_soon }}</div></div>
+      <div class="kpi"><div class="muted" data-i18n="Missing Docs">Missing Docs</div><div class="num">{{ stats.missing_docs }}</div></div>
+      <div class="kpi"><div class="muted" data-i18n="Delayed Shipments">Delayed Shipments</div><div class="num">{{ stats.shipments_delayed }}</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:18px">
+  <div class="kpi"><div class="muted" data-i18n="Total Leads">Total Leads</div><div class="num">{{ stats.leads }}</div></div>
+  <div class="kpi"><div class="muted" data-i18n="Lead Follow-ups Due">Lead Follow-ups Due</div><div class="num">{{ stats.followup_due }}</div></div>
+  <div class="kpi"><div class="muted" data-i18n="Open Tasks">Open Tasks</div><div class="num">{{ stats.tasks_open }}</div></div>
+  <div class="kpi"><div class="muted" data-i18n="Pipeline Value">Pipeline Value</div><div class="num">{{ '%.0f'|format(stats.pipeline_value or 0) }}</div></div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="topbar" style="margin-bottom:12px"><h3 style="margin:0" data-i18n="Shipment Pulse">Shipment Pulse</h3><a href="/shipments/dashboard" class="btn btn-secondary" data-i18n="View board">View board</a></div>
+    <div class="shipment-card-list">
+      {% for s in shipment_rows %}
+      <div class="shipment-row-card">
+        <div class="shipment-row-head">
+          <div>
+            <div class="shipment-title">{{ s.shipment_no }}</div>
+            <div class="small muted">{{ s.company or s.supplier or '-' }}</div>
+          </div>
+          <span class="badge">{{ s.current_status }}</span>
+        </div>
+        <div class="small muted">{{ s.origin_port or '-' }} → {{ s.destination_port or '-' }}</div>
+        <div class="ship-line tahhan-line"><div style="width:{% if s.current_status == 'Booked' %}12{% elif s.current_status == 'Loaded' %}25{% elif s.current_status == 'Sailed' %}38{% elif s.current_status == 'At Sea' %}52{% elif s.current_status == 'Arrived' %}68{% elif s.current_status == 'Customs' %}84{% elif s.current_status == 'Delivered' %}95{% else %}100{% endif %}%"></div></div>
+        <div class="row spread-row" style="margin-top:8px">
+          <span class="small muted"><span data-i18n="ETA">ETA</span> {% if s.eta_at and s.eta_at > 0 %}{{ s.eta_at|int|datetimeformat }}{% else %}-{% endif %}</span>
+          <a class="btn btn-secondary" href="/shipment/{{ s.id }}" data-i18n="Open">Open</a>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty-state" data-i18n="No shipments yet.">No shipments yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="topbar" style="margin-bottom:12px"><h3 style="margin:0" data-i18n="Urgent Follow-ups">Urgent Follow-ups</h3><a href="/followups" class="btn btn-secondary" data-i18n="Open follow-ups">Open follow-ups</a></div>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th data-i18n="Type">Type</th><th data-i18n="Title">Title</th><th data-i18n="Due">Due</th></tr>
+        {% for f in overdue_followups %}
+        <tr><td>{{ f.entity_type }}</td><td>{{ f.title }}</td><td>{% if f.followup_at and f.followup_at > 0 %}{{ f.followup_at|int|datetimeformat }}{% else %}-{% endif %}</td></tr>
+        {% else %}<tr><td colspan="3" class="muted" data-i18n="No urgent follow-ups.">No urgent follow-ups.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <div class="topbar" style="margin-bottom:12px"><h3 style="margin:0" data-i18n="Hot Leads">Hot Leads</h3><a href="/leads" class="btn btn-secondary" data-i18n="Open leads">Open leads</a></div>
+    <div class="table-wrap">
+      <table class="table"><tr><th data-i18n="Company">Company</th><th data-i18n="Stage">Stage</th><th data-i18n="Score">Score</th></tr>{% for row in hot %}<tr><td><a href="/lead/{{ row.id }}">{{ row.company }}</a></td><td>{{ row.stage }}</td><td>{{ row.score }}</td></tr>{% else %}<tr><td colspan="3" class="muted" data-i18n="No leads yet.">No leads yet.</td></tr>{% endfor %}</table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="topbar" style="margin-bottom:12px"><h3 style="margin:0" data-i18n="Recent Activity">Recent Activity</h3><a href="/activity" class="btn btn-secondary" data-i18n="Full activity">Full activity</a></div>
+    <div class="table-wrap">
+      <table class="table"><tr><th data-i18n="User">User</th><th data-i18n="Action">Action</th><th data-i18n="Details">Details</th></tr>{% for a in recent_activity[:8] %}<tr><td>{{ a.username }}</td><td>{{ a.action }}</td><td>{{ a.details }}</td></tr>{% else %}<tr><td colspan="3" class="muted" data-i18n="No activity yet.">No activity yet.</td></tr>{% endfor %}</table>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <div class="tahhan-kicker" data-i18n="Quick launch flow">Quick launch flow</div>
+    <div class="detail-list" style="margin-top:12px">
+      <div class="detail-row"><span data-i18n="Step 1">Step 1</span><div><b data-i18n="Import or review leads">Import or review leads</b><div class="muted small" data-i18n="Make sure the pipeline and ownership are clean before any campaign starts.">Make sure the pipeline and ownership are clean before any campaign starts.</div></div></div>
+      <div class="detail-row"><span data-i18n="Step 2">Step 2</span><div><b data-i18n="Prepare the outreach workflow">Prepare the outreach workflow</b><div class="muted small" data-i18n="Choose profiles, templates and lead lists from Outreach Hub.">Choose profiles, templates and lead lists from Outreach Hub.</div></div></div>
+      <div class="detail-row"><span data-i18n="Step 3">Step 3</span><div><b data-i18n="Execute shipments and follow-ups">Execute shipments and follow-ups</b><div class="muted small" data-i18n="Keep operations, documents and reminders visible in the same system.">Keep operations, documents and reminders visible in the same system.</div></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tahhan-kicker" data-i18n="Demo talking points">Demo talking points</div>
+    <div class="detail-list" style="margin-top:12px">
+      <div class="detail-row"><span data-i18n="Value">Value</span><div class="muted" data-i18n="One platform for sales, outreach, shipments and trade knowledge.">One platform for sales, outreach, shipments and trade knowledge.</div></div>
+      <div class="detail-row"><span data-i18n="Ease">Ease</span><div class="muted" data-i18n="Separated workspaces, unified search and cleaner EN / AR navigation.">Separated workspaces, unified search and cleaner EN / AR navigation.</div></div>
+      <div class="detail-row"><span data-i18n="Future">Future</span><div class="muted" data-i18n="Altahhan edition today, reusable product direction for other companies tomorrow.">Altahhan edition today, reusable product direction for other companies tomorrow.</div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

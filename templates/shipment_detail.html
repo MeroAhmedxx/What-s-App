@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+.stat-card{padding:14px 16px;border:1px solid rgba(202,160,61,.14);border-radius:16px;background:linear-gradient(180deg,var(--panel),var(--panel-2))}.deal-card{border:1px solid rgba(202,160,61,.14);border-radius:16px;padding:14px;background:linear-gradient(180deg,var(--panel),var(--panel-2))}.deal-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.doc-pill{display:inline-flex;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);font-size:12px;margin:2px 6px 2px 0;color:var(--text)}.mini-table td,.mini-table th{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.07)}.mini-table{width:100%;border-collapse:collapse}
+@media(max-width:980px){.deal-grid,.summary-grid{grid-template-columns:1fr}}
+</style>
+<div class="topbar"><div><h1>{{ shipment.shipment_no }}</h1><div class="muted small">Shipment master for booking, vessel, ports and all customer deals under it.</div></div><div class="row"><a class="btn btn-secondary" href="/shipments">Back to Shipments</a><a class="btn" href="/shipments/dashboard">Dashboard</a></div></div>
+
+<div class="summary-grid">
+  <div class="stat-card"><div class="muted small">Route</div><strong>{{ shipment.origin_port or '-' }} → {{ shipment.destination_port or '-' }}</strong></div>
+  <div class="stat-card"><div class="muted small">Vessel</div><strong>{{ shipment.vessel_name or '-' }}</strong></div>
+  <div class="stat-card"><div class="muted small">Containers</div><strong>{{ shipment.container_count or 0 }} × {{ shipment.container_type or '-' }}</strong></div>
+  <div class="stat-card"><div class="muted small">Status</div><strong>{{ shipment.current_status }}</strong><div class="small muted">{{ meta.summary }}</div></div>
+</div>
+
+<div class="deal-grid" style="margin-top:18px">
+  <div class="card">
+    <h3>Customer deals inside this shipment</h3>
+    <div class="small muted" style="margin-bottom:12px">Each customer deal has its own invoice, packing list, and payment documents.</div>
+    {% if deals %}
+      <table class="mini-table">
+        <tr><th>Client</th><th>Invoice</th><th>Amount</th><th>Status</th><th></th></tr>
+        {% for d in deals %}
+        <tr>
+          <td><strong>{{ d.client_name or '-' }}</strong><div class="small muted">{{ d.product_name or '-' }}</div></td>
+          <td>{{ d.invoice_no or '-' }}<div class="small muted">{{ d.invoice_date or '-' }}</div></td>
+          <td>{{ '%.2f'|format(d.total_amount or 0) }} {{ d.currency or 'USD' }}</td>
+          <td><span class="badge">{{ d.status or 'Draft' }}</span></td>
+          <td><a class="btn" href="/deal/{{ d.id }}">Open deal</a></td>
+        </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <div class="alert">No customer deals yet. Add one deal for each client inside this shipment.</div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Add customer deal</h3>
+    <div class="small muted" style="margin-bottom:12px">Use existing client if already saved, or type a new client directly.</div>
+    <form method="post" action="/shipment/{{ shipment.id }}/deal/add" class="grid">
+      <div class="grid grid-2">
+        <select name="client_mode"><option value="existing">Existing client</option><option value="new">New client</option></select>
+        <select name="client_id"><option value="0">Choose client (optional)</option>{% for c in clients %}<option value="{{ c.id }}">{{ c.company_en or c.company_ar or c.customer_code }}</option>{% endfor %}</select>
+      </div>
+      <div class="grid grid-2">
+        <input name="client_name" placeholder="Client name (for new client)">
+        <input name="client_country" placeholder="Country">
+      </div>
+      <textarea name="client_address" placeholder="Client address"></textarea>
+      <div class="grid grid-3">
+        <input name="ice_no" placeholder="ICE / tax no">
+        <input name="phone" placeholder="Phone">
+        <input name="email" placeholder="Email">
+      </div>
+      <div class="grid grid-3">
+        <input name="invoice_no" placeholder="Invoice no" required>
+        <input type="date" name="invoice_date">
+        <input name="booking_no" placeholder="Booking no" value="{{ shipment.shipment_no }}">
+      </div>
+      <div class="grid grid-2">
+        <input name="product_name" placeholder="Product name" value="{{ shipment.product_name or '' }}">
+        <input name="product_description" placeholder="Full product description">
+      </div>
+      <div class="grid grid-4">
+        <input name="qty_ton" type="number" step="0.001" placeholder="Qty ton">
+        <input name="cartons_count" type="number" placeholder="Cartons">
+        <input name="net_weight_ton" type="number" step="0.001" placeholder="Net weight ton">
+        <input name="gross_weight_ton" type="number" step="0.001" placeholder="Gross weight ton">
+      </div>
+      <div class="grid grid-4">
+        <input name="unit_price" type="number" step="0.01" placeholder="Unit price">
+        <input name="freight_amount" type="number" step="0.01" placeholder="Freight">
+        <input name="currency" value="USD" placeholder="Currency">
+        <select name="payment_method"><option value="CAD">CAD</option><option value="Bill">Bill of Exchange</option></select>
+      </div>
+      <div class="grid grid-2">
+        <input type="date" name="maturity_date" placeholder="Maturity date">
+        <input name="consignee_bank_name" placeholder="Consignee bank name">
+      </div>
+      <div class="grid grid-2">
+        <input name="consignee_bank_account" placeholder="Consignee account no">
+        <input name="consignee_bank_iban" placeholder="Consignee IBAN">
+      </div>
+      <div class="grid grid-2">
+        <input name="consignee_bank_swift" placeholder="Consignee SWIFT">
+        <input name="consignee_bank_postal_code" placeholder="Bank postal code">
+      </div>
+      <textarea name="consignee_bank_address" placeholder="Consignee bank address"></textarea>
+      <textarea name="notes" placeholder="Notes"></textarea>
+      <div class="row" style="justify-content:flex-end"><button type="submit">Create deal</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <h3>Shipment notes</h3>
+    <form method="post" action="/shipment/{{ shipment.id }}/update" class="grid">
+      <input type="hidden" name="trade_type" value="{{ shipment.trade_type }}">
+      <input type="hidden" name="client_id" value="{{ shipment.client_id or 0 }}">
+      <input type="hidden" name="company" value="{{ shipment.company }}">
+      <input type="hidden" name="supplier" value="{{ shipment.supplier }}">
+      <input type="hidden" name="contact_person" value="{{ shipment.contact_person }}">
+      <input type="hidden" name="product_category" value="{{ shipment.product_category }}">
+      <input type="hidden" name="item_name" value="{{ shipment.item_name }}">
+      <input type="hidden" name="product_name" value="{{ shipment.product_name }}">
+      <input type="hidden" name="quantity" value="{{ shipment.quantity }}">
+      <input type="hidden" name="quantity_unit" value="{{ shipment.quantity_unit }}">
+      <input type="hidden" name="container_count" value="{{ shipment.container_count }}">
+      <input type="hidden" name="container_type" value="{{ shipment.container_type }}">
+      <input type="hidden" name="cartons_count" value="{{ shipment.cartons_count }}">
+      <input type="hidden" name="invoice_amount" value="{{ shipment.invoice_amount }}">
+      <input type="hidden" name="currency" value="{{ shipment.currency }}">
+      <input type="hidden" name="origin_port" value="{{ shipment.origin_port }}">
+      <input type="hidden" name="destination_port" value="{{ shipment.destination_port }}">
+      <input type="hidden" name="vessel_name" value="{{ shipment.vessel_name }}">
+      <input type="hidden" name="etd_date" value="{% if shipment.etd_at and shipment.etd_at > 0 %}{{ shipment.etd_at|int|datetimeformat }}{% endif %}">
+      <input type="hidden" name="eta_date" value="{% if shipment.eta_at and shipment.eta_at > 0 %}{{ shipment.eta_at|int|datetimeformat }}{% endif %}">
+      <input type="hidden" name="current_status" value="{{ shipment.current_status }}">
+      <input type="hidden" name="assigned_to" value="{{ shipment.assigned_to }}">
+      <textarea name="missing_items" placeholder="Missing items">{{ shipment.missing_items }}</textarea>
+      <textarea name="notes" placeholder="Shipment notes">{{ shipment.notes }}</textarea>
+      <button type="submit">Save notes</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Manual shipment documents</h3>
+    <div class="small muted" style="margin-bottom:12px">Use this only for shipment-wide files. Customer invoice/packing/CAD/Bill should be generated inside each deal.</div>
+    <div>
+      {% for d in docs %}
+      <div class="doc-pill">{{ d.doc_type }}</div>
+      {% else %}<div class="muted">No shipment-level files yet.</div>{% endfor %}
+    </div>
+    <form method="post" action="/shipment/{{ shipment.id }}/document/add" enctype="multipart/form-data" class="grid" style="margin-top:12px">
+      <div class="grid grid-3"><select name="doc_type"><option value="bl">BL / AWB</option><option value="certificate">Certificate</option><option value="other">Other</option></select><input name="title" placeholder="Title"><select name="entry_mode"><option value="file">Upload file</option><option value="manual">Manual entry</option></select></div>
+      <textarea name="manual_text" placeholder="Manual text"></textarea>
+      <input type="file" name="file" accept=".pdf,image/*,.doc,.docx,.xls,.xlsx,.xlsm">
+      <textarea name="notes" placeholder="Notes"></textarea>
+      <button type="submit">Save shipment document</button>
+    </form>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const modeEl = document.querySelector('select[name="client_mode"]');
+  const idEl = document.querySelector('select[name="client_id"]');
+  if (!modeEl || !idEl) return;
+  const inputs = {
+    client_name: document.querySelector('input[name="client_name"]'),
+    client_country: document.querySelector('input[name="client_country"]'),
+    client_address: document.querySelector('textarea[name="client_address"]'),
+    ice_no: document.querySelector('input[name="ice_no"]'),
+    consignee_bank_name: document.querySelector('input[name="consignee_bank_name"]'),
+    consignee_bank_account: document.querySelector('input[name="consignee_bank_account"]'),
+    consignee_bank_iban: document.querySelector('input[name="consignee_bank_iban"]'),
+    consignee_bank_swift: document.querySelector('input[name="consignee_bank_swift"]'),
+    consignee_bank_postal_code: document.querySelector('input[name="consignee_bank_postal_code"]'),
+    consignee_bank_address: document.querySelector('textarea[name="consignee_bank_address"]'),
+  };
+  async function fillClient() {
+    if (modeEl.value !== 'existing' || !idEl.value || idEl.value === '0') return;
+    try {
+      const r = await fetch(`/api/current-client/${idEl.value}`);
+      if (!r.ok) return;
+      const c = await r.json();
+      if (inputs.client_name) inputs.client_name.value = c.company_en || c.company_ar || '';
+      if (inputs.client_country) inputs.client_country.value = c.country || '';
+      if (inputs.client_address) inputs.client_address.value = c.address || '';
+      if (inputs.ice_no) inputs.ice_no.value = c.ice || '';
+      if (inputs.consignee_bank_name) inputs.consignee_bank_name.value = c.bank_name || '';
+      if (inputs.consignee_bank_account) inputs.consignee_bank_account.value = c.iban_account || '';
+      if (inputs.consignee_bank_iban) inputs.consignee_bank_iban.value = c.iban_account || '';
+      if (inputs.consignee_bank_swift) inputs.consignee_bank_swift.value = c.swift_code || '';
+      if (inputs.consignee_bank_postal_code) inputs.consignee_bank_postal_code.value = c.postal_code || '';
+      if (inputs.consignee_bank_address) inputs.consignee_bank_address.value = c.bank_address || '';
+    } catch (e) { console.error(e); }
+  }
+  modeEl.addEventListener('change', fillClient);
+  idEl.addEventListener('change', fillClient);
+});
+</script>
+
+{% endblock %}

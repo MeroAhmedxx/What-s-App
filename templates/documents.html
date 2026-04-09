@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Documents Center</h1></div>
+<div class="card">
+  <form method="get" class="grid grid-4" style="grid-template-columns:1.5fr 1fr auto;align-items:end">
+    <input name="q" value="{{ q }}" placeholder="Search by title, shipment, client or notes">
+    <select name="doc_type">
+      <option value="">All document types</option>
+      {% for t in ['invoice','packing_list','attachment','other','certificate','bl'] %}
+      <option value="{{ t }}" {% if doc_type_filter == t %}selected{% endif %}>{{ t }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Filter</button>
+  </form>
+</div>
+<div class="card"><table class="table"><tr><th>Type</th><th>Title</th><th>Source</th><th>Company</th><th>Entry</th><th>Preview / File</th><th>Created</th></tr>
+{% for r in rows %}
+<tr>
+<td>{{ r.doc_type }}</td>
+<td>{{ r.title or '-' }}</td>
+<td>{{ r.source_type }} · {{ r.source_label or ('#' ~ r.source_id) }}</td>
+<td>{{ r.company_label or '-' }}</td>
+<td>{{ r.entry_mode }}</td>
+<td>
+  {% if r.filename %}
+    {% set fn = r.filename %}
+    {% if r.source_type == 'shipment' %}
+      <a href="/uploads/shipments/{{ fn }}" target="_blank">Open file</a>
+    {% elif r.source_type == 'client_invoice' or r.doc_type == 'invoice' %}
+      <a href="/uploads/clients/{{ fn }}" target="_blank">Open file</a>
+    {% else %}
+      <a href="/uploads/tasks/{{ fn }}" target="_blank">Open file</a>
+    {% endif %}
+  {% else %}
+    <div class="muted small">{{ (r.manual_text or r.notes or '-')[:120] }}</div>
+  {% endif %}
+</td>
+<td>{{ r.created_at|int|datetimeformat if r.created_at else '-' }}</td>
+</tr>
+{% else %}<tr><td colspan="7">No documents found.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

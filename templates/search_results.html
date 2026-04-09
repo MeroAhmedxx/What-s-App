@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="grid-hero" style="margin-bottom:18px">
+  <div class="hero-brand">
+    <span class="brand-chip" data-i18n="Unified search">Unified search</span>
+    <h1 data-i18n="Search the whole workspace">Search the whole workspace</h1>
+    <p class="muted" data-i18n="Use one search box to scan leads, clients, shipments, tasks, follow-ups, campaigns and trade references.">Use one search box to scan leads, clients, shipments, tasks, follow-ups, campaigns and trade references.</p>
+    <form class="row" method="get" action="/workspace-search" style="margin-top:14px">
+      <input name="q" value="{{ query }}" placeholder="Search leads, shipments, clients..." data-i18n-placeholder="Search leads, shipments, clients...">
+      <button class="btn fit" type="submit" data-i18n="Search">Search</button>
+    </form>
+  </div>
+  <div class="sand-card">
+    <div class="tahhan-kicker" data-i18n="Results summary">Results summary</div>
+    {% if query %}
+    <div class="grid grid-3" style="margin-top:12px">
+      <div class="kpi"><div class="muted" data-i18n="Matches">Matches</div><div class="num">{{ total_found }}</div></div>
+      <div class="kpi"><div class="muted" data-i18n="Query">Query</div><div class="num" style="font-size:18px">{{ query }}</div></div>
+      <div class="kpi"><div class="muted" data-i18n="Top areas">Top areas</div><div class="num" style="font-size:18px">{{ counters.leads + counters.clients + counters.shipments + counters.deals + counters.export_products + counters.export_markets }}</div></div>
+    </div>
+    {% else %}
+    <div class="empty-state" data-i18n="Start with a company name, lead email, shipment number, campaign name or trade country.">Start with a company name, lead email, shipment number, campaign name or trade country.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% if query %}
+<div class="grid grid-2">
+  <div class="card">
+    <div class="topbar" style="margin-bottom:10px"><h3 style="margin:0"><span data-i18n="Leads">Leads</span> · {{ counters.leads }}</h3><a class="btn btn-secondary" href="/leads" data-i18n="Open leads">Open leads</a></div>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th data-i18n="Company">Company</th><th data-i18n="Contact">Contact</th><th data-i18n="Stage">Stage</th></tr>
+        {% for r in results.leads %}
+        <tr><td><a href="/lead/{{ r.id }}">{{ r.company }}</a></td><td>{{ r.contact_person or r.email or '-' }}</td><td>{{ r.stage }}</td></tr>
+        {% else %}<tr><td colspan="3" class="muted" data-i18n="No lead matches.">No lead matches.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="topbar" style="margin-bottom:10px"><h3 style="margin:0"><span data-i18n="Clients">Clients</span> · {{ counters.clients }}</h3><a class="btn btn-secondary" href="/current-clients" data-i18n="Open clients">Open clients</a></div>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th data-i18n="Company">Company</th><th data-i18n="Code">Code</th><th data-i18n="Country">Country</th></tr>
+        {% for r in results.clients %}
+        <tr><td><a href="/current-client/{{ r.id }}">{{ r.company_en or r.company_ar or '-' }}</a></td><td>{{ r.customer_code or '-' }}</td><td>{{ r.country or '-' }}</td></tr>
+        {% else %}<tr><td colspan="3" class="muted" data-i18n="No client matches.">No client matches.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <div class="topbar" style="margin-bottom:10px"><h3 style="margin:0"><span data-i18n="Shipments">Shipments</span> · {{ counters.shipments }}</h3><a class="btn btn-secondary" href="/shipments" data-i18n="Open shipments">Open shipments</a></div>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th data-i18n="Shipment">Shipment</th><th data-i18n="Company">Company</th><th data-i18n="Status">Status</th></tr>
+        {% for r in results.shipments %}
+        <tr><td><a href="/shipment/{{ r.id }}">{{ r.shipment_no }}</a></td><td>{{ r.company or r.supplier or '-' }}</td><td>{{ r.current_status }}</td></tr>
+        {% else %}<tr><td colspan="3" class="muted" data-i18n="No shipment matches.">No shipment matches.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="topbar" style="margin-bottom:10px"><h3 style="margin:0"><span data-i18n="Customer Deals">Customer Deals</span> · {{ counters.deals }}</h3><a class="btn btn-secondary" href="/export/deals" data-i18n="Open deals">Open deals</a></div>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th data-i18n="Invoice">Invoice</th><th data-i18n="Client">Client</th><th data-i18n="Shipment">Shipment</th></tr>
+        {% for r in results.deals %}
+        <tr><td><a href="/deal/{{ r.id }}">{{ r.invoice_no or '-' }}</a></td><td>{{ r.client_name or '-' }}</td><td>{{ r.shipment_no or '-' }}</td></tr>
+        {% else %}<tr><td colspan="3" class="muted" data-i18n="No deal matches.">No deal matches.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="topbar" style="margin-bottom:10px"><h3 style="margin:0"><span data-i18n="Tasks">Tasks</span> · {{ counters.tasks }}</h3><a class="btn btn-secondary" href="/tasks" data-i18n="Open tasks">Open tasks</a></div>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th data-i18n="Title">Title</th><th data-i18n="Assigned To">Assigned To</th><th data-i18n="Status">Status</th></tr>
+        {% for r in results.tasks %}
+        <tr><td><a href="/task/{{ r.id }}">{{ r.title }}</a></td><td>{{ r.assigned_to or '-' }}</td><td>{{ r.status }}</td></tr>
+        {% else %}<tr><td colspan="3" class="muted" data-i18n="No task matches.">No task matches.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-3" style="margin-top:18px">
+  <div class="card">
+    <div class="topbar" style="margin-bottom:10px"><h3 style="margin:0"><span data-i18n="Follow-ups">Follow-ups</span> · {{ counters.followups }}</h3><a class="btn btn-secondary" href="/followups" data-i18n="Open follow-ups">Open follow-ups</a></div>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th data-i18n="Title">Title</th><th data-i18n="Type">Type</th></tr>
+        {% for r in results.followups %}
+        <tr><td>{{ r.title }}</td><td>{{ r.entity_type }}</td></tr>
+        {% else %}<tr><td colspan="2" class="muted" data-i18n="No follow-up matches.">No follow-up matches.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="topbar" style="margin-bottom:10px"><h3 style="margin:0"><span data-i18n="Campaigns">Campaigns</span> · {{ counters.campaigns }}</h3><a class="btn btn-secondary" href="/campaign-v2/campaigns" data-i18n="Open campaigns">Open campaigns</a></div>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th data-i18n="Name">Name</th><th data-i18n="Status">Status</th></tr>
+        {% for r in results.campaigns %}
+        <tr><td>{% if r.sender_mode == 'sequence_v2' %}<a href="/campaign-v2/sequence/{{ r.id }}">{{ r.name }}</a>{% elif r.sender_mode == 'campaign_v2' %}<a href="/campaign-v2/campaign/{{ r.id }}">{{ r.name }}</a>{% else %}{{ r.name }}{% endif %}</td><td>{{ r.status }}</td></tr>
+        {% else %}<tr><td colspan="2" class="muted" data-i18n="No campaign matches.">No campaign matches.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="topbar" style="margin-bottom:10px"><h3 style="margin:0"><span data-i18n="Trade Library">Trade Library</span> · {{ counters.agreements }}</h3><a class="btn btn-secondary" href="/agreements" data-i18n="Open trade library">Open trade library</a></div>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th data-i18n="Title">Title</th><th data-i18n="Region">Region</th></tr>
+        {% for r in results.agreements %}
+        <tr><td><a href="/agreement/{{ r.id }}">{{ r.title }}</a></td><td>{{ r.region or r.partner_countries or '-' }}</td></tr>
+        {% else %}<tr><td colspan="2" class="muted" data-i18n="No trade matches.">No trade matches.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card">
+    <div class="topbar" style="margin-bottom:10px"><h3 style="margin:0"><span data-i18n="Product Catalog">Product Catalog</span> · {{ counters.export_products }}</h3><a class="btn btn-secondary" href="/export/products" data-i18n="Open products">Open products</a></div>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th data-i18n="Product">Product</th><th data-i18n="Category">Category</th><th data-i18n="Markets">Markets</th></tr>
+        {% for r in results.export_products %}
+        <tr><td>{{ r.product_name }}</td><td>{{ r.category or '-' }}</td><td>{{ r.target_markets or '-' }}</td></tr>
+        {% else %}<tr><td colspan="3" class="muted" data-i18n="No product matches.">No product matches.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="topbar" style="margin-bottom:10px"><h3 style="margin:0"><span data-i18n="Market Notes">Market Notes</span> · {{ counters.export_markets }}</h3><a class="btn btn-secondary" href="/export/markets" data-i18n="Open markets">Open markets</a></div>
+    <div class="table-wrap">
+      <table class="table">
+        <tr><th data-i18n="Country">Country</th><th data-i18n="Region">Region</th><th data-i18n="Demand">Demand</th></tr>
+        {% for r in results.export_markets %}
+        <tr><td>{{ r.country_name }}</td><td>{{ r.region_name or '-' }}</td><td>{{ r.demand_level or '-' }}</td></tr>
+        {% else %}<tr><td colspan="3" class="muted" data-i18n="No market matches.">No market matches.</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endif %}
+{% endblock %}

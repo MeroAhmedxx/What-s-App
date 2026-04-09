@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title if title else branding.app_title }}</title>
+  <link rel="stylesheet" href="/static/style.css?v=tradeflow-v15">
+  <script src="/static/lang/translator.js?v=3"></script>
+  <style>
+    body{margin:0;font-family:Arial,sans-serif}
+    .layout{display:flex;min-height:100vh}
+    .sidebar{width:260px;flex:0 0 260px}
+    .content-shell{flex:1;min-width:0}
+    .notif-menu{display:none}
+    .notif-menu.open{display:block}
+    html[dir="rtl"] .layout{flex-direction:row-reverse}
+    html[dir="rtl"] .sidebar{text-align:right}
+    html[dir="rtl"] .content{text-align:right}
+    html[dir="rtl"] .app-header{direction:rtl}
+    html[dir="rtl"] .header-actions{direction:rtl}
+    html[dir="rtl"] .row{direction:rtl}
+    html[dir="rtl"] .grid{direction:rtl}
+
+    .mobile-menu-btn{display:none;background:linear-gradient(180deg,var(--gold-2),var(--gold));color:#22150e;border:none;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}
+    .mobile-menu-btn:hover{text-decoration:none;opacity:.95}
+    .header-search{display:flex;gap:8px;align-items:center;flex:1;max-width:480px}
+    .header-search input{min-width:220px}
+    .edition-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);font-size:12px;color:#f6dfbe}
+    @media (max-width: 980px){
+      .layout{display:block}
+      .sidebar{width:280px;max-width:86vw;position:fixed;left:0;top:0;bottom:0;transform:translateX(-102%);transition:transform .22s ease;overflow:auto;z-index:120}
+      .layout.sidebar-open .sidebar{transform:translateX(0)}
+      .sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:110}
+      .layout.sidebar-open .sidebar-backdrop{display:block}
+      .content-shell{min-width:0}
+      .app-header{position:sticky;top:0;z-index:100;gap:10px;flex-wrap:wrap;padding:14px}
+      .app-header>div:first-child{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+      .mobile-menu-btn{display:inline-flex;align-items:center;justify-content:center}
+      .header-actions{width:100%;overflow:auto;white-space:nowrap;padding-bottom:2px;flex-wrap:wrap}
+      .header-search{max-width:none;width:100%}
+      .workspace-switch{flex-wrap:wrap}
+      .section-tabs{overflow:auto;white-space:nowrap}
+      .content{padding:14px}
+    }
+  </style>
+</head>
+<body>
+{% set path = request.url.path %}
+{% set is_outreach = path.startswith('/email-tool') or path.startswith('/campaign-v2') or path.startswith('/bridge') or path.startswith('/tracking') or path.startswith('/outreach') %}
+<div class="toast-stack" id="toast-stack"></div>
+<div class="layout" id="app-layout">
+  <div class="sidebar-backdrop" onclick="document.getElementById('app-layout').classList.remove('sidebar-open')"></div>
+  <aside class="sidebar tahhan-sidebar">
+    <div class="brand-block">
+      <img src="/static/assets/logo.png" alt="{{ branding.company_name }}" class="brand-logo">
+      <div>
+        <div class="brand-name">{{ branding.product_name }}</div>
+        <div class="muted small">{{ branding.edition_name }} · {{ branding.company_name }}</div>
+      </div>
+    </div>
+    <div class="edition-badge">
+      <span data-i18n="Productized build">Productized build</span>
+      <b>{{ product_version }}</b>
+    </div>
+    <a href="/profile" class="user-chip-link"><div class="muted small user-chip">{{ (user.display_name or username) if user else username }}{% if user and user.job_title %} · {{ user.job_title }}{% endif %}</div></a>
+
+    <div class="workspace-switch">
+      <a href="/dashboard" class="workspace-btn {% if not is_outreach %}active{% endif %}" data-i18n="Operations">Operations</a>
+      <a href="/email-tool" class="workspace-btn {% if is_outreach %}active{% endif %}" data-i18n="Outreach Hub">Outreach Hub</a>
+    </div>
+
+    {% if is_outreach %}
+    <div class="nav-group">
+      <div class="nav-title" data-i18n="Outreach">Outreach</div>
+      <nav class="side-nav compact">
+        <a href="/email-tool" data-i18n="Overview">Overview</a>
+        <a href="/leads" data-i18n="Leads & Lists">Leads & Lists</a>
+        <a href="/campaign-v2/campaigns" data-i18n="Campaigns">Campaigns</a>
+        <a href="/campaign-v2/sequences" data-i18n="Sequences">Sequences</a>
+        <a href="/campaign-v2/replies" data-i18n="Replies & Suppression">Replies & Suppression</a>
+        <a href="/campaign-v2/profiles" data-i18n="Profiles">Profiles</a>
+        <a href="/campaign-v2/templates" data-i18n="Template Library">Template Library</a>
+        <a href="/campaign-v2/agent" data-i18n="AI Agent">AI Agent</a>
+        <a href="/campaign-v2/logs" data-i18n="Activity Logs">Activity Logs</a>
+        <a href="/campaign-v2/inbox-sync" data-i18n="Inbox Sync">Inbox Sync</a>
+        <a href="/tracking" data-i18n="Tracking & Signals">Tracking & Signals</a>
+        <a href="/bridge" data-i18n="Outlook Bridge">Outlook Bridge</a>
+        <a href="/bridge/monitor" data-i18n="Bridge Monitor">Bridge Monitor</a>
+      </nav>
+    </div>
+    <div class="nav-group">
+      <div class="nav-title" data-i18n="Connected workflow">Connected workflow</div>
+      <nav class="side-nav compact">
+        <a href="/followups" data-i18n="Follow-ups">Follow-ups</a>
+        <a href="/shipments" data-i18n="Shipments">Shipments</a>
+        <a href="/documents" data-i18n="Documents">Documents</a>
+        <a href="/export" data-i18n="Export Engine">Export Engine</a>
+      </nav>
+    </div>
+    {% else %}
+    <div class="nav-group">
+      <div class="nav-title" data-i18n="CRM">CRM</div>
+      <nav class="side-nav compact">
+        <a href="/dashboard" data-i18n="Dashboard">Dashboard</a>
+        <a href="/leads" data-i18n="Leads">Leads</a>
+        <a href="/pipeline" data-i18n="Pipeline">Pipeline</a>
+        <a href="/current-clients" data-i18n="Current Clients">Current Clients</a>
+      </nav>
+    </div>
+    <div class="nav-group">
+      <div class="nav-title" data-i18n="Operations">Operations</div>
+      <nav class="side-nav compact">
+        <a href="/shipments" data-i18n="Shipments">Shipments</a>
+        <a href="/export/deals" data-i18n="Customer Deals">Customer Deals</a>
+        <a href="/documents" data-i18n="Documents">Documents</a>
+        <a href="/followups" data-i18n="Follow-ups">Follow-ups</a>
+        <a href="/tasks" data-i18n="Tasks">Tasks</a>
+        <a href="/email-tool" data-i18n="Outreach Hub">Outreach Hub</a>
+      </nav>
+    </div>
+    <div class="nav-group">
+      <div class="nav-title" data-i18n="Insights">Insights</div>
+      <nav class="side-nav compact">
+        <a href="/reports" data-i18n="Reports">Reports</a>
+        <a href="/agreements" data-i18n="Trade Library">Trade Library</a>
+        <a href="/export/products" data-i18n="Product Catalog">Product Catalog</a>
+        <a href="/export/markets" data-i18n="Market Notes">Market Notes</a>
+      </nav>
+    </div>
+    {% if user and user.role in ['admin', 'manager'] %}
+    <div class="nav-group">
+      <div class="nav-title" data-i18n="Admin">Admin</div>
+      <nav class="side-nav compact">
+        <a href="/users" data-i18n="Users">Users</a>
+        <a href="/analytics" data-i18n="Analytics">Analytics</a>
+        <a href="/product-settings" data-i18n="Product Settings">Product Settings</a>
+      </nav>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <div class="sidebar-footer-card">
+      <div class="small muted">{{ branding.primary_market }}</div>
+      <div class="small" data-i18n="Altahhan edition today, reusable product tomorrow.">Altahhan edition today, reusable product tomorrow.</div>
+    </div>
+  </aside>
+
+  <div class="content-shell">
+    <header class="app-header">
+      <div>
+        <button class="mobile-menu-btn" type="button" onclick="document.getElementById('app-layout').classList.toggle('sidebar-open')">☰ <span data-i18n="Menu">Menu</span></button>
+        <div>
+          <div class="page-headline">{{ title if title else 'Dashboard' }}</div>
+          <div class="small muted">{{ branding.hero_tagline }}</div>
+        </div>
+      </div>
+      <form class="header-search" method="get" action="/workspace-search">
+        <input type="text" name="q" value="{{ request.query_params.get('q','') }}" placeholder="Search leads, shipments, clients..." data-i18n-placeholder="Search leads, shipments, clients...">
+        <button type="submit" class="btn fit" data-i18n="Search">Search</button>
+      </form>
+      <div class="header-actions">
+        <select id="lang-switcher" class="lang-switcher" onchange="setLang(this.value)">
+          <option value="en">EN</option>
+          <option value="ar">AR</option>
+        </select>
+        <a class="header-link" href="/intro" data-i18n="Intro">Intro</a>
+        <a class="header-link" href="/tour" data-i18n="Product Tour">Product Tour</a>
+        <a class="header-link" href="/notifications" data-i18n="Notifications">Notifications</a>
+        <a class="header-link" href="/profile" data-i18n="Profile">Profile</a>
+        <a class="header-link" href="/logout" data-i18n="Logout">Logout</a>
+      </div>
+    </header>
+
+    <div class="section-tabs">
+      {% if is_outreach %}
+        <a class="section-tab {% if path == '/email-tool' or path == '/outreach' %}active{% endif %}" href="/email-tool" data-i18n="Overview">Overview</a>
+        <a class="section-tab {% if path.startswith('/leads') %}active{% endif %}" href="/leads" data-i18n="Leads & Lists">Leads & Lists</a>
+        <a class="section-tab {% if path.startswith('/campaign-v2/campaigns') %}active{% endif %}" href="/campaign-v2/campaigns" data-i18n="Campaigns">Campaigns</a>
+        <a class="section-tab {% if path.startswith('/campaign-v2/sequences') or path.startswith('/campaign-v2/sequence/') %}active{% endif %}" href="/campaign-v2/sequences" data-i18n="Sequences">Sequences</a>
+        <a class="section-tab {% if path.startswith('/campaign-v2/replies') %}active{% endif %}" href="/campaign-v2/replies" data-i18n="Replies & Suppression">Replies & Suppression</a>
+        <a class="section-tab {% if path.startswith('/campaign-v2/profiles') %}active{% endif %}" href="/campaign-v2/profiles" data-i18n="Profiles">Profiles</a>
+        <a class="section-tab {% if path.startswith('/campaign-v2/templates') %}active{% endif %}" href="/campaign-v2/templates" data-i18n="Template Library">Template Library</a>
+        <a class="section-tab {% if path.startswith('/campaign-v2/agent') %}active{% endif %}" href="/campaign-v2/agent" data-i18n="AI Agent">AI Agent</a>
+        <a class="section-tab {% if path.startswith('/campaign-v2/logs') %}active{% endif %}" href="/campaign-v2/logs" data-i18n="Activity Logs">Activity Logs</a>
+        <a class="section-tab {% if path.startswith('/campaign-v2/inbox-sync') %}active{% endif %}" href="/campaign-v2/inbox-sync" data-i18n="Inbox Sync">Inbox Sync</a>
+        <a class="section-tab {% if path.startswith('/tracking') %}active{% endif %}" href="/tracking" data-i18n="Tracking & Signals">Tracking & Signals</a>
+        <a class="section-tab {% if path.startswith('/bridge') and not path.startswith('/bridge/monitor') %}active{% endif %}" href="/bridge" data-i18n="Bridge">Bridge</a>
+        <a class="section-tab {% if path.startswith('/bridge/monitor') %}active{% endif %}" href="/bridge/monitor" data-i18n="Monitor">Monitor</a>
+      {% else %}
+        <a class="section-tab {% if path == '/dashboard' %}active{% endif %}" href="/dashboard" data-i18n="Dashboard">Dashboard</a>
+        <a class="section-tab {% if path.startswith('/leads') %}active{% endif %}" href="/leads" data-i18n="Leads">Leads</a>
+        <a class="section-tab {% if path.startswith('/pipeline') %}active{% endif %}" href="/pipeline" data-i18n="Pipeline">Pipeline</a>
+        <a class="section-tab {% if path.startswith('/current-clients') or path.startswith('/current-client') %}active{% endif %}" href="/current-clients" data-i18n="Clients">Clients</a>
+        <a class="section-tab {% if path.startswith('/shipments') or path.startswith('/shipment/') %}active{% endif %}" href="/shipments" data-i18n="Shipments">Shipments</a>
+        <a class="section-tab {% if path.startswith('/deal/') or path.startswith('/export/deals') %}active{% endif %}" href="/export/deals" data-i18n="Customer Deals">Customer Deals</a>
+        <a class="section-tab {% if path.startswith('/reports') %}active{% endif %}" href="/reports" data-i18n="Reports">Reports</a>
+        <a class="section-tab {% if path.startswith('/agreements') or path.startswith('/agreement/') %}active{% endif %}" href="/agreements" data-i18n="Trade Library">Trade Library</a>
+        <a class="section-tab {% if path.startswith('/export') %}active{% endif %}" href="/export" data-i18n="Export Engine">Export Engine</a>
+      {% endif %}
+    </div>
+
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+<script>
+document.addEventListener('click', function(e){
+  const layout=document.getElementById('app-layout');
+  const sidebar=document.querySelector('.sidebar');
+  const btn=e.target.closest('.mobile-menu-btn');
+  if(btn) return;
+  if(window.innerWidth<=980 && layout && layout.classList.contains('sidebar-open')){
+    if(sidebar && !sidebar.contains(e.target)){ layout.classList.remove('sidebar-open'); }
+  }
+});
+window.addEventListener('resize', function(){
+  const layout=document.getElementById('app-layout');
+  if(window.innerWidth>980 && layout){ layout.classList.remove('sidebar-open'); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><div><h1 data-i18n="Export Products">Export Products</h1><div class="muted small" data-i18n="Store the product lines you want the sales and export teams to pitch repeatedly.">Store the product lines you want the sales and export teams to pitch repeatedly.</div></div></div>
+<div class="grid grid-2">
+  <div class="card">
+    <h3 data-i18n="Add product">Add product</h3>
+    <form method="post" action="/export/products/add" class="grid">
+      <input name="product_name" placeholder="Product name" required>
+      <input name="category" placeholder="Category">
+      <input name="origin_country" placeholder="Origin country">
+      <input name="packaging" placeholder="Packaging">
+      <input name="price_band" placeholder="Price band">
+      <input name="target_markets" placeholder="Target markets">
+      <textarea name="market_fit" placeholder="Why it fits certain markets"></textarea>
+      <textarea name="notes" placeholder="Extra notes"></textarea>
+      <button type="submit" data-i18n="Save product">Save product</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3 data-i18n="Current catalog">Current catalog</h3>
+    <div class="table-wrap"><table class="table"><tr><th data-i18n="Product">Product</th><th data-i18n="Category">Category</th><th data-i18n="Markets">Markets</th></tr>
+      {% for row in rows %}<tr><td>{{ row.product_name }}</td><td>{{ row.category or '-' }}</td><td>{{ row.target_markets or '-' }}</td></tr>{% else %}<tr><td colspan="3" class="muted">No products yet.</td></tr>{% endfor %}
+    </table></div>
+  </div>
+</div>
+{% endblock %}

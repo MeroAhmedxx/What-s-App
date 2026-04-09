@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1 style="margin:0">Team Chat</h1>
+    <div class="muted small">Smooth rooms, private access, password-protected rooms, and better admin control.</div>
+  </div>
+  <div class="row" style="justify-content:flex-end">
+    <a class="header-link" href="/profile">My Profile</a>
+  </div>
+</div>
+
+{% set error = request.query_params.get('error') %}
+{% set success = request.query_params.get('success') %}
+{% if error %}
+<div class="card" style="border-color:#ffb86c;color:#ffb86c">
+  {% if error == 'not_allowed' %}You are not allowed to do this action.
+  {% elif error == 'room_not_allowed' %}You do not have access to this room.
+  {% elif error == 'room_password_invalid' %}Wrong room password.
+  {% elif error == 'read_only_room' %}This room is read only for you.
+  {% else %}Action could not be completed.{% endif %}
+</div>
+{% endif %}
+{% if success %}<div class="card" style="border-color:#2ec27e;color:#2ec27e">{% if success == 'chat_cleared' %}Room messages cleared successfully.{% else %}Done.{% endif %}</div>{% endif %}
+
+<div class="wa-shell">
+  <aside class="wa-sidebar card">
+    <div class="wa-sidebar-head">
+      <div>
+        <div style="font-weight:700">Rooms</div>
+        <div class="muted small">{{ channels|length }} available</div>
+      </div>
+    </div>
+
+    <div class="room-list">
+      {% for ch in channels %}
+        <a class="room-item {% if ch.id == active_channel_id %}active{% endif %}" href="/chat?channel_id={{ ch.id }}">
+          <div class="room-avatar">{{ '🔒' if ch.password_hash else '💬' }}</div>
+          <div class="fit">
+            <div class="room-name">{{ ch.name }}</div>
+            <div class="muted small">{{ ch.description or ('Private room' if ch.only_members else 'Open room') }}</div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+
+    {% if user.role == 'admin' %}
+    <div class="room-admin-block">
+      <h3 style="margin:0 0 10px 0">Create private room</h3>
+      <form method="post" action="/chat/channel/create" class="grid">
+        <input name="name" placeholder="Room name" required>
+        <input name="description" placeholder="Description">
+        <input name="room_password" placeholder="Optional password">
+        <label class="small muted"><input type="checkbox" name="only_members" value="1" checked style="width:auto"> Only selected members can enter</label>
+        <select name="member_usernames" multiple size="6">
+          {% for u in all_users %}
+          <option value="{{ u.username }}">{{ u.display_name or u.username }} (@{{ u.username }})</option>
+          {% endfor %}
+        </select>
+        <div class="muted small">Ctrl / Cmd + click to select multiple users.</div>
+        <button type="submit">Create room</button>
+      </form>
+    </div>
+    {% endif %}
+  </aside>
+
+  <section class="wa-main card">
+    <div class="wa-chat-head">
+      <div class="row" style="align-items:center">
+        <div class="room-avatar big">{{ '🔒' if active_channel.password_hash else '💬' }}</div>
+        <div class="fit">
+          <div style="font-weight:800;font-size:18px">{{ active_channel.name }}</div>
+          <div class="muted small">
+            {{ active_channel.description or 'No description yet' }}
+            {% if active_channel.only_members %} · Members only{% endif %}
+            {% if active_channel.password_hash %} · Password protected{% endif %}
+          </div>
+        </div>
+      </div>
+      {% if user.role == 'admin' %}
+      <div class="row wa-admin-actions" style="justify-content:flex-end">
+        <form method="post" action="/chat/clear" onsubmit="return confirm('Delete all messages in this room?')">
+          <input type="hidden" name="channel_id" value="{{ active_channel_id }}">
+          <button type="submit" class="btn-secondary">Clear room</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if user.role == 'admin' %}
+    <div class="wa-room-tools">
+      <div class="tool-card">
+        <div style="font-weight:700;margin-bottom:8px">Room password</div>
+        <form method="post" action="/chat/channel/password" class="row">
+          <input type="hidden" name="channel_id" value="{{ active_channel_id }}">
+          <input name="room_password" placeholder="Set new password or leave empty to remove">
+          <button type="submit" class="fit">Save password</button>
+        </form>
+      </div>
+      <div class="tool-card">
+        <div style="font-weight:700;margin-bottom:8px">Members</div>
+        <div class="member-pills">
+          {% for m in room_members %}
+            <div class="member-pill">
+              <span>@{{ m.username }}</span>
+              {% if m.username != user.username %}
+              <form method="post" action="/chat/channel/member/remove">
+                <input type="hidden" name="channel_id" value="{{ active_channel_id }}">
+                <input type="hidden" name="username" value="{{ m.username }}">
+                <button type="submit" class="tiny-danger">×</button>
+              </form>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+        <form method="post" action="/chat/channel/member/add" class="row" style="margin-top:10px">
+          <input type="hidden" name="channel_id" value="{{ active_channel_id }}">
+          <select name="username">
+            {% for u in all_users %}
+            <option value="{{ u.username }}">{{ u.display_name or u.username }} (@{{ u.username }})</option>
+            {% endfor %}
+          </select>
+          <label class="small muted fit"><input type="checkbox" name="can_write" value="1" checked style="width:auto"> can write</label>
+          <button type="submit" class="fit">Add member</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if needs_room_password %}
+    <div class="room-lock-box">
+      <div style="font-size:42px">🔐</div>
+      <h3>Enter room password</h3>
+      <p class="muted">This room is protected. Enter the password to open it on this device.</p>
+      <form method="post" action="/chat/unlock" class="grid" style="max-width:420px;margin:auto">
+        <input type="hidden" name="channel_id" value="{{ active_channel_id }}">
+        <input type="password" name="room_password" placeholder="Room password" required>
+        <button type="submit">Unlock room</button>
+      </form>
+    </div>
+    {% else %}
+
+    <div id="chatbox" class="wa-chat-box">
+      {% for row in rows %}
+      <div class="wa-msg {% if row.username == username %}mine{% endif %}">
+        {% if row.username != username %}<img src="{{ avatar_url(row.avatar_path) }}" class="avatar-sm wa-msg-avatar">{% endif %}
+        <div class="wa-msg-bubble">
+          <div class="wa-msg-head">
+            <div>
+              <strong>{{ row.display_name or row.username }}</strong>
+              {% if row.job_title %}<span class="muted small"> · {{ row.job_title }}</span>{% endif %}
+            </div>
+            <div class="small muted">{{ row.created_at|datetimeformat }}</div>
+          </div>
+          {% if row.reply_to_id %}
+          <div class="reply-bubble"><b>{{ row.reply_username }}</b>: {{ row.reply_message[:140] }}</div>
+          {% endif %}
+          {% if row.message %}
+            {% if row.message.startswith('[[sticker:') and row.message.endswith(']]') %}
+              <div class="sticker-bubble">{{ {'party':'🥳','fire':'🔥','rocket':'🚀','love':'❤️','boss':'😎','check':'✅'}.get(row.message[10:-2], '✨') }}</div>
+            {% else %}
+              <div class="message-text">{{ row.message }}</div>
+            {% endif %}
+          {% endif %}
+          {% if row.file_path and row.file_type == 'image' %}
+            <div style="margin-top:10px"><a href="/uploads/chat/{{ row.file_path }}" target="_blank"><img src="/uploads/chat/{{ row.file_path }}" class="chat-image"></a></div>
+          {% elif row.file_path and row.file_type == 'pdf' %}
+            <div style="margin-top:10px"><a href="/uploads/chat/{{ row.file_path }}" target="_blank">📄 {{ row.file_name or 'Open PDF' }}</a></div>
+          {% endif %}
+          <div class="wa-msg-actions">
+            <button type="button" class="btn-secondary fit" onclick='setReply({{ row.id }}, {{ (row.display_name or row.username or "")|tojson }}, {{ (row.message or "")|tojson }})'>Reply</button>
+            {% if user.role == 'admin' or row.username == username %}
+            <form method="post" action="/chat/{{ row.id }}/delete" onsubmit="return confirm('Delete this message?')">
+              <button type="submit" class="btn-secondary fit">Delete</button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if can_write_room %}
+    <div class="wa-compose-wrap">
+      <form method="post" action="/chat/send" class="grid" enctype="multipart/form-data" id="chat-form">
+        <input type="hidden" name="channel_id" value="{{ active_channel_id }}">
+        <input type="hidden" name="reply_to_id" id="reply_to_id" value="0">
+        <input type="hidden" name="sticker" id="sticker_input" value="">
+        <div id="reply-preview" class="reply-preview" style="display:none"></div>
+        <div class="emoji-bar">
+          {% for e in ['😀','😂','😍','👍','👏','🔥','❤️','🙏','😎','🎉','💼','✅','📧'] %}
+            <button type="button" class="emoji-btn" onclick="insertEmoji('{{ e }}')">{{ e }}</button>
+          {% endfor %}
+        </div>
+        <div class="emoji-bar stickers-row">
+          <button type="button" class="sticker-btn" onclick="pickSticker('party')">🥳 Party</button>
+          <button type="button" class="sticker-btn" onclick="pickSticker('fire')">🔥 Fire</button>
+          <button type="button" class="sticker-btn" onclick="pickSticker('rocket')">🚀 Rocket</button>
+          <button type="button" class="sticker-btn" onclick="pickSticker('love')">❤️ Love</button>
+          <button type="button" class="sticker-btn" onclick="pickSticker('boss')">😎 Boss</button>
+          <button type="button" class="sticker-btn" onclick="pickSticker('check')">✅ Done</button>
+        </div>
+        <div class="chat-compose-row whatsapp-compose">
+          <img src="{{ '/uploads/avatars/' ~ (user.avatar_path or '') if user and user.avatar_path else '/static/assets/logo.png' }}" class="avatar-sm">
+          <div class="chat-compose-main">
+            <textarea name="message" id="chat-message" placeholder="Write a message like WhatsApp... Enter to send, Shift + Enter for a new line"></textarea>
+            <div class="chat-compose-actions">
+              <input type="file" name="file" accept="image/*,.pdf" class="fit" style="max-width:240px">
+              <button type="submit" class="fit">Send</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    {% else %}
+    <div class="card muted">You can open this room, but you do not have permission to write in it.</div>
+    {% endif %}
+
+    {% endif %}
+  </section>
+</div>
+<script>
+function handleComposerKey(e){
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    e.target.form.submit();
+  }
+}
+window.addEventListener('load', ()=>{
+  const box=document.querySelector('.wa-composer textarea, .wa-composer input[name="message"], #chat-message');
+  if(box){ box.addEventListener('keydown', handleComposerKey); }
+  const list=document.querySelector('.wa-messages'); if(list){ list.scrollTop=list.scrollHeight; }
+});
+</script>
+
+<script>
+function esc(text){ return String(text || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function insertEmoji(e){ const input = document.getElementById('chat-message'); input.value = (input.value || '') + e + ' '; input.focus(); document.getElementById('sticker_input').value=''; }
+function pickSticker(name){ document.getElementById('sticker_input').value = name; const input = document.getElementById('chat-message'); if(input){ input.value=''; } document.getElementById('chat-form').submit(); }
+function setReply(id, username, message){ const replyInput = document.getElementById('reply_to_id'); if(!replyInput) return; replyInput.value = id; const box = document.getElementById('reply-preview'); box.style.display = 'flex'; box.innerHTML = `<div><b>Replying to ${esc(username)}</b><div class="small muted">${esc(String(message).slice(0,140))}</div></div><button type="button" class="btn-secondary fit" onclick="clearReply()">Cancel</button>`; }
+function clearReply(){ const replyInput = document.getElementById('reply_to_id'); if(replyInput){ replyInput.value = 0; } const box = document.getElementById('reply-preview'); if(box){ box.style.display = 'none'; } }
+function avatar(path){ return path ? `/uploads/avatars/${encodeURIComponent(path)}` : '/static/assets/logo.png'; }
+function stickerHtml(message){ const map={party:'🥳',fire:'🔥',rocket:'🚀',love:'❤️',boss:'😎',check:'✅'}; if((message||'').startsWith('[[sticker:') && (message||'').endsWith(']]')){ const k=message.slice(10,-2); return `<div class="sticker-bubble">${map[k] || '✨'}</div>`;} return `<div class="message-text">${esc(message)}</div>`; }
+async function pollChat(){
+  {% if not needs_room_password %}
+  const res = await fetch('/chat/poll?channel_id={{ active_channel_id }}');
+  const data = await res.json();
+  const box = document.getElementById('chatbox'); if(!box) return;
+  box.innerHTML = '';
+  data.rows.forEach(r=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'wa-msg' + (r.username === {{ username|tojson }} ? ' mine' : '');
+    let html = '';
+    if(r.username !== {{ username|tojson }}){ html += `<img src="${avatar(r.avatar_path || '')}" class="avatar-sm wa-msg-avatar">`; }
+    html += `<div class="wa-msg-bubble"><div class="wa-msg-head"><div><strong>${esc(r.display_name || r.username || '')}</strong>${r.job_title ? `<span class="muted small"> · ${esc(r.job_title)}</span>` : ''}</div><div class="small muted">${esc(r.created_at || '')}</div></div>`;
+    if(r.reply_to_id){ html += `<div class="reply-bubble"><b>${esc(r.reply_username || '')}</b>: ${esc((r.reply_message || '').slice(0,140))}</div>`; }
+    if(r.message){ html += stickerHtml(r.message); }
+    if(r.file_path && r.file_type === 'image'){ html += `<div style="margin-top:10px"><a href="/uploads/chat/${encodeURIComponent(r.file_path)}" target="_blank"><img src="/uploads/chat/${encodeURIComponent(r.file_path)}" class="chat-image"></a></div>`; }
+    else if(r.file_path && r.file_type === 'pdf'){ html += `<div style="margin-top:10px"><a href="/uploads/chat/${encodeURIComponent(r.file_path)}" target="_blank">📄 ${esc(r.file_name || 'Open PDF')}</a></div>`; }
+    html += `<div class="wa-msg-actions"><button type="button" class="btn-secondary fit">Reply</button></div></div>`;
+    wrap.innerHTML = html;
+    wrap.querySelector('button').onclick = ()=> setReply(r.id, r.display_name || r.username || '', r.message || '');
+    box.appendChild(wrap);
+  });
+  box.scrollTop = box.scrollHeight;
+  {% endif %}
+}
+setInterval(pollChat, 3000);
+const chatMessage = document.getElementById('chat-message');
+if(chatMessage){
+  chatMessage.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      document.getElementById('chat-form').submit();
+    }
+  });
+}
+const chatbox = document.getElementById('chatbox'); if(chatbox){ chatbox.scrollTop = chatbox.scrollHeight; }
+</script>
+{% endblock %}

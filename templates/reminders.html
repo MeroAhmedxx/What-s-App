@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Reminders Center</h1></div>
+<div class="grid grid-3">
+  <div class="card"><h3>Due Follow-ups</h3><div class="muted small">Shipment and task follow-ups due soon</div><div class="kpi">{{ followups_due|length }}</div></div>
+  <div class="card"><h3>Due Tasks</h3><div class="muted small">Tasks with due dates</div><div class="kpi">{{ task_due|length }}</div></div>
+  <div class="card"><h3>Lead Follow-ups</h3><div class="muted small">Leads that need contact</div><div class="kpi">{{ lead_due|length }}</div></div>
+</div>
+<div class="grid grid-2">
+  <div class="card"><h3>Follow-ups</h3><table class="table"><tr><th>Title</th><th>Type</th><th>Due</th><th>Status</th></tr>{% for r in followups_due %}<tr><td>{{ r.title }}</td><td>{{ r.entity_type }}</td><td>{{ r.followup_at|int|datetimeformat }}</td><td>{{ r.status }}</td></tr>{% else %}<tr><td colspan="4">No follow-ups due.</td></tr>{% endfor %}</table></div>
+  <div class="card"><h3>Tasks</h3><table class="table"><tr><th>Task</th><th>Assigned</th><th>Due</th><th>Status</th></tr>{% for r in task_due %}<tr><td><a href="/task/{{ r.id }}">{{ r.title }}</a></td><td>{{ r.assigned_to or '-' }}</td><td>{{ r.due_at|int|datetimeformat }}</td><td>{{ r.status }}</td></tr>{% else %}<tr><td colspan="4">No due tasks.</td></tr>{% endfor %}</table></div>
+</div>
+<div class="card"><h3>Lead Follow-ups</h3><table class="table"><tr><th>Lead</th><th>Stage</th><th>Assigned</th><th>Follow-up</th></tr>{% for r in lead_due %}<tr><td>{{ r.company or r.contact_person or ('Lead #' ~ r.id) }}</td><td>{{ r.stage or '-' }}</td><td>{{ r.assigned_to or '-' }}</td><td>{{ r.next_followup_at|int|datetimeformat }}</td></tr>{% else %}<tr><td colspan="4">No lead reminders.</td></tr>{% endfor %}</table></div>
+{% endblock %}

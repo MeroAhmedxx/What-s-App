@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ branding.app_title }}</title>
+  <link rel="stylesheet" href="/static/style.css?v=tradeflow-v15">
+  <script src="/static/lang/translator.js?v=3"></script>
+  <style>
+    .landing-shell{min-height:100vh;padding:24px;background:radial-gradient(circle at top right,rgba(242,197,108,.14),transparent 24%),linear-gradient(180deg,#25130d,#140c09 45%,#100907)}
+    .landing-top{display:flex;justify-content:space-between;align-items:center;gap:14px;max-width:1180px;margin:0 auto 22px}
+    .landing-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .landing-grid{display:grid;grid-template-columns:1.45fr .9fr;gap:18px;max-width:1180px;margin:0 auto}
+    .landing-hero,.landing-side,.landing-band,.landing-modules,.landing-story-grid{max-width:1180px;margin:0 auto}
+    .landing-hero{background:linear-gradient(135deg,rgba(139,30,23,.94),rgba(50,21,13,.98));border:1px solid rgba(242,197,108,.28);border-radius:28px;padding:28px;position:relative;overflow:hidden}
+    .landing-hero:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 84% 18%,rgba(242,197,108,.15),transparent 22%),linear-gradient(120deg,transparent 0 56%,rgba(255,255,255,.04) 57% 62%,transparent 63% 100%);pointer-events:none}
+    .landing-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+    .landing-side{display:grid;gap:18px}
+    .landing-side .card,.landing-modules .card,.landing-band .card,.landing-story-grid .card{margin-bottom:0}
+    .value-stack{display:grid;gap:12px}
+    .value-item{padding:14px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+    .landing-band{margin-top:18px}
+    .landing-modules{margin-top:18px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .landing-story-grid{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .landing-chip-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .landing-foot{max-width:1180px;margin:18px auto 0;color:#e9d6bf;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .hero-title{font-size:42px;line-height:1.05;margin:10px 0 8px}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);font-size:12px;font-weight:800;color:#fff1d6}
+    .phase-list{display:grid;gap:10px}
+    .phase-item{padding:14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+    @media (max-width: 980px){
+      .landing-grid,.landing-modules,.landing-kpis,.landing-story-grid{grid-template-columns:1fr}
+      .landing-top{flex-direction:column;align-items:flex-start}
+      .hero-title{font-size:34px}
+    }
+  </style>
+</head>
+<body>
+<div class="landing-shell">
+  <div class="landing-top">
+    <div class="brand-block" style="margin:0">
+      <img src="/static/assets/logo.png" alt="{{ branding.company_name }}" class="brand-logo">
+      <div>
+        <div class="brand-name">{{ branding.product_name }}</div>
+        <div class="muted small">{{ branding.edition_name }} · {{ branding.company_name }}</div>
+      </div>
+    </div>
+    <div class="landing-actions">
+      <select id="lang-switcher" class="lang-switcher" onchange="setLang(this.value)">
+        <option value="en">EN</option>
+        <option value="ar">AR</option>
+      </select>
+      <a class="btn btn-secondary" href="/tour" data-i18n="Product Tour">Product Tour</a>
+      <a class="btn btn-secondary" href="/login" data-i18n="Open login">Open login</a>
+    </div>
+  </div>
+
+  <div class="landing-grid">
+    <section class="landing-hero">
+      <div class="eyebrow" data-i18n="Export & import operating system">Export & import operating system</div>
+      <h1 class="hero-title" data-i18n="A bilingual sales, outreach and shipment workspace built for Altahhan — and ready to scale to future companies.">A bilingual sales, outreach and shipment workspace built for Altahhan — and ready to scale to future companies.</h1>
+      <p class="muted" style="max-width:820px">
+        <span>{{ branding.landing_tagline }}</span>
+        <span data-i18n="The platform combines leads, follow-ups, outreach campaigns, shipment tracking, documents and trade references in one clean workspace.">The platform combines leads, follow-ups, outreach campaigns, shipment tracking, documents and trade references in one clean workspace.</span>
+      </p>
+      <div class="landing-chip-row">
+        <span class="brand-chip" data-i18n="Leads">Leads</span>
+        <span class="brand-chip" data-i18n="Outreach Hub">Outreach Hub</span>
+        <span class="brand-chip" data-i18n="Shipments & Docs">Shipments & Docs</span>
+        <span class="brand-chip" data-i18n="Trade Library">Trade Library</span>
+        <span class="brand-chip">EN / AR</span>
+      </div>
+      <div class="quick-actions" style="margin-top:18px">
+        <a class="btn fit" href="/login" data-i18n="Enter workspace">Enter workspace</a>
+        <a class="btn btn-secondary fit" href="#modules" data-i18n="View modules">View modules</a>
+        <a class="btn btn-secondary fit" href="/tour" data-i18n="View launch plan">View launch plan</a>
+      </div>
+      <div class="landing-kpis">
+        <div class="kpi"><div class="muted" data-i18n="Designed for">Designed for</div><div class="num" style="font-size:20px" data-i18n="Export & import teams">Export & import teams</div></div>
+        <div class="kpi"><div class="muted" data-i18n="Positioning">Positioning</div><div class="num" style="font-size:20px">{{ branding.edition_name }}</div></div>
+        <div class="kpi"><div class="muted" data-i18n="Future ready">Future ready</div><div class="num" style="font-size:20px" data-i18n="Reusable product core">Reusable product core</div></div>
+      </div>
+    </section>
+
+    <aside class="landing-side">
+      <div class="card">
+        <div class="tahhan-kicker" data-i18n="What management sees">What management sees</div>
+        <h3 style="margin:8px 0 10px" data-i18n="A clearer business story">A clearer business story</h3>
+        <div class="value-stack">
+          <div class="value-item"><b data-i18n="Pipeline visibility">Pipeline visibility</b><div class="muted small" data-i18n="Track leads, stage movement, follow-ups and commercial value.">Track leads, stage movement, follow-ups and commercial value.</div></div>
+          <div class="value-item"><b data-i18n="Controlled outreach">Controlled outreach</b><div class="muted small" data-i18n="Run branded email workflows with templates, profiles, tracking and logs.">Run branded email workflows with templates, profiles, tracking and logs.</div></div>
+          <div class="value-item"><b data-i18n="Operational execution">Operational execution</b><div class="muted small" data-i18n="Manage shipments, documents, invoices, packing lists and internal tasks.">Manage shipments, documents, invoices, packing lists and internal tasks.</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tahhan-kicker" data-i18n="Recommended rollout">Recommended rollout</div>
+        <div class="small muted" data-i18n="1) onboard users and roles 2) import leads and current clients 3) activate outreach profiles 4) run campaigns and follow-ups 5) manage shipments and documentation from one dashboard">1) onboard users and roles 2) import leads and current clients 3) activate outreach profiles 4) run campaigns and follow-ups 5) manage shipments and documentation from one dashboard</div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="landing-band">
+    <div class="card">
+      <div class="row" style="justify-content:space-between;align-items:flex-start;gap:18px">
+        <div style="flex:1">
+          <div class="tahhan-kicker" data-i18n="Why this matters">Why this matters</div>
+          <h3 style="margin:8px 0 10px" data-i18n="This is not just an internal tool. It is a product foundation.">This is not just an internal tool. It is a product foundation.</h3>
+          <div class="muted" data-i18n="The current deployment fits Al Tahhan, while the structure is ready to be rebranded and reused later for other trading, export or manufacturing companies.">The current deployment fits Al Tahhan, while the structure is ready to be rebranded and reused later for other trading, export or manufacturing companies.</div>
+        </div>
+        <div class="row" style="flex:1;gap:10px">
+          <div class="mini-card" style="flex:1"><b data-i18n="Bilingual UX">Bilingual UX</b><div class="muted small" data-i18n="English and Arabic switching for teams and managers.">English and Arabic switching for teams and managers.</div></div>
+          <div class="mini-card" style="flex:1"><b data-i18n="Edition model">Edition model</b><div class="muted small" data-i18n="Altahhan today, future company editions tomorrow.">Altahhan today, future company editions tomorrow.</div></div>
+          <div class="mini-card" style="flex:1"><b data-i18n="Sales + operations">Sales + operations</b><div class="muted small" data-i18n="Leads, outreach, shipment execution and trade knowledge.">Leads, outreach, shipment execution and trade knowledge.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modules" class="landing-modules">
+    <div class="card">
+      <h3 style="margin-top:0" data-i18n="CRM Core">CRM Core</h3>
+      <div class="muted" data-i18n="Leads, pipeline, current clients and follow-up discipline for export sales teams.">Leads, pipeline, current clients and follow-up discipline for export sales teams.</div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0" data-i18n="Outreach Hub">Outreach Hub</h3>
+      <div class="muted" data-i18n="Campaigns, sending profiles, templates, tracking, logs and Outlook bridge support.">Campaigns, sending profiles, templates, tracking, logs and Outlook bridge support.</div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0" data-i18n="Shipment Control">Shipment Control</h3>
+      <div class="muted" data-i18n="Shipment board, documents, invoices, packing lists, reminders and task ownership.">Shipment board, documents, invoices, packing lists, reminders and task ownership.</div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0" data-i18n="Trade Library">Trade Library</h3>
+      <div class="muted" data-i18n="Agreement references and trade knowledge to support export planning and decision making.">Agreement references and trade knowledge to support export planning and decision making.</div>
+    </div>
+  </div>
+
+  <div class="landing-story-grid">
+    <div class="card">
+      <div class="tahhan-kicker" data-i18n="Easy adoption">Easy adoption</div>
+      <div class="phase-list">
+        <div class="phase-item"><b data-i18n="For management">For management</b><div class="muted small" data-i18n="One dashboard for pipeline, outreach, shipments and team follow-up.">One dashboard for pipeline, outreach, shipments and team follow-up.</div></div>
+        <div class="phase-item"><b data-i18n="For the export team">For the export team</b><div class="muted small" data-i18n="Simple navigation, separated outreach workspace and faster daily execution.">Simple navigation, separated outreach workspace and faster daily execution.</div></div>
+        <div class="phase-item"><b data-i18n="For future sales">For future sales</b><div class="muted small" data-i18n="Rebrand the same core later for a new company or country edition.">Rebrand the same core later for a new company or country edition.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="tahhan-kicker" data-i18n="Built-in advantages">Built-in advantages</div>
+      <div class="phase-list">
+        <div class="phase-item"><b data-i18n="Unified search">Unified search</b><div class="muted small" data-i18n="Search leads, clients, campaigns, shipments, tasks and trade references from one place.">Search leads, clients, campaigns, shipments, tasks and trade references from one place.</div></div>
+        <div class="phase-item"><b data-i18n="Bilingual navigation">Bilingual navigation</b><div class="muted small" data-i18n="Key screens now support cleaner EN / AR switching with stronger translation hooks.">Key screens now support cleaner EN / AR switching with stronger translation hooks.</div></div>
+        <div class="phase-item"><b data-i18n="Faster presentation flow">Faster presentation flow</b><div class="muted small" data-i18n="Intro page, product tour and management-oriented dashboard for a stronger demo.">Intro page, product tour and management-oriented dashboard for a stronger demo.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="landing-foot small">
+    <div>{{ branding.support_label }}</div>
+    <div>{{ branding.product_name }} · {{ branding.edition_name }} · {{ product_version }}</div>
+  </div>
+</div>
+</body>
+</html>

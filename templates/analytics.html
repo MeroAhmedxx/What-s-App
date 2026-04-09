@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Analytics</h1></div>
+<div class="grid grid-2">
+  <div class="card"><h3>Leads by Stage</h3><table class="table"><tr><th>Stage</th><th>Count</th><th>Value</th></tr>{% for row in lead_counts %}<tr><td>{{ row.stage }}</td><td>{{ row.cnt }}</td><td>{{ '%.0f'|format(row.total or 0) }}</td></tr>{% endfor %}</table></div>
+  <div class="card"><h3>Tasks by Status</h3><table class="table"><tr><th>Status</th><th>Count</th></tr>{% for row in task_counts %}<tr><td>{{ row.status }}</td><td>{{ row.cnt }}</td></tr>{% endfor %}</table></div>
+</div>
+<div class="grid grid-2" style="margin-top:18px">
+  <div class="card"><h3>Campaigns by Status</h3><table class="table"><tr><th>Status</th><th>Count</th></tr>{% for row in campaign_counts %}<tr><td>{{ row.status }}</td><td>{{ row.cnt }}</td></tr>{% endfor %}</table></div>
+  <div class="card"><h3>Owners / Assignees</h3><table class="table"><tr><th>Owner</th><th>Leads</th><th>Value</th></tr>{% for row in assignee_summary %}<tr><td>{{ row.assigned_to or 'Unassigned' }}</td><td>{{ row.cnt }}</td><td>{{ '%.0f'|format(row.total or 0) }}</td></tr>{% endfor %}</table></div>
+</div>
+{% endblock %}

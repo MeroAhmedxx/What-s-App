@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>Campaign #{{ campaign.id }} — {{ campaign.name }}</h1>
+    <div class="muted small">Mode: {{ campaign.sender_mode }} · Status: {{ campaign.status }}</div>
+  </div>
+  {% if not is_mobile %}<form method="post" action="/campaign/{{ campaign.id }}/send">
+    <button type="submit">{% if campaign.sender_mode == 'outlook' %}Queue for Outlook Desktop{% else %}Send Now{% endif %}</button>
+  </form>{% else %}<div class="muted small">Mobile can review campaign status only. Sending is available from desktop.</div>{% endif %}
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <p><b>Subject:</b> {{ campaign.subject }}</p>
+    <div class="pre">{{ campaign.body }}</div>
+  </div>
+  <div class="card">
+    <h3>Bridge Devices</h3>
+    <table class="table">
+      <tr><th>User</th><th>Device</th><th>Outlook</th><th>Last Seen</th></tr>
+      {% for d in device_rows %}
+      <tr>
+        <td>{{ d.username }}</td>
+        <td>{{ d.device_name }}</td>
+        <td>{{ d.outlook_account_email or '-' }}</td>
+        <td>{{ d.last_seen_at|datetimeformat if d.last_seen_at else '-' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4">No active Outlook Bridge devices yet. Open <a href="/bridge">Outlook Bridge</a> and register one.</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Jobs</h3>
+  <table class="table">
+    <tr><th>Lead</th><th>Email</th><th>Status</th><th>Assigned User</th><th>Device</th><th>Error</th></tr>
+    {% for j in jobs %}
+    <tr>
+      <td>{{ j.company }}</td>
+      <td>{{ j.email }}</td>
+      <td>{{ j.status }}</td>
+      <td>{{ j.assigned_username or '-' }}</td>
+      <td>{{ j.assigned_device_token[:10] ~ '…' if j.assigned_device_token else '-' }}</td>
+      <td>{{ j.error_message }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

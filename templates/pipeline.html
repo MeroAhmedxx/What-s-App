@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Pipeline</h1></div>
+<div class="columns">
+{% for stage in stages %}
+  <div class="column"><h3>{{ stage }}</h3>
+    <div class="small muted" style="margin-bottom:12px">{{ stage_meta[stage].count }} leads · Value {{ '%.0f'|format(stage_meta[stage].value or 0) }}</div>
+    {% for lead in buckets[stage] %}
+      <div class="lead-card">
+        <div><a href="/lead/{{ lead.id }}">{{ lead.company }}</a></div>
+        <div class="small muted">{{ lead.contact_person or lead.email or '-' }}</div>
+        <div class="small muted">Owner: {{ lead.assigned_to or '-' }}</div>
+        <div class="small muted">Score: {{ lead.score or 0 }} · {{ lead.estimated_value or 0 }}</div>
+        {% if lead.tags %}<div class="small muted">{{ lead.tags }}</div>{% endif %}
+        <form method="post" action="/leads/{{ lead.id }}/stage" class="stage">
+          <select name="stage">
+            <option {% if stage=='Lead' %}selected{% endif %}>Lead</option>
+            <option {% if stage=='Contacted' %}selected{% endif %}>Contacted</option>
+            <option {% if stage=='Negotiation' %}selected{% endif %}>Negotiation</option>
+            <option {% if stage=='Quotation' %}selected{% endif %}>Quotation</option>
+            <option {% if stage=='Won' %}selected{% endif %}>Won</option>
+            <option {% if stage=='Lost' %}selected{% endif %}>Lost</option>
+          </select>
+          <button type="submit">Move</button>
+        </form>
+      </div>
+    {% endfor %}
+  </div>
+{% endfor %}
+</div>
+{% endblock %}

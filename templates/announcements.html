@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="topbar"><h1>Announcements</h1><div class="actions"><a class="btn btn-secondary" href="/notifications">Open Notifications</a></div></div>
+<div class="grid grid-2">
+  <div class="card">
+    <h3>New Announcement</h3>
+    <form method="post" action="/announcements/add" class="grid">
+      <input name="title" placeholder="Title" required>
+      <textarea name="body" placeholder="Announcement text" required></textarea>
+      <div class="row"><button type="submit" class="fit">Publish</button></div>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Announcement List</h3>
+    <table class="table">
+      <tr><th>Title</th><th>Author</th><th>Open</th></tr>
+      {% for r in rows %}
+      <tr>
+        <td><strong>{{ r.title }}</strong></td>
+        <td>{{ r.author }}</td>
+        <td><a class="btn btn-secondary" href="/announcement/{{ r.id }}">View</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}
